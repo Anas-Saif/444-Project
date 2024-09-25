@@ -1,0 +1,10 @@
+.env
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+postgres_data/
+*.db
+.venv
+.docker
+.ipython
