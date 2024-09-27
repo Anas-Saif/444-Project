@@ -4,9 +4,6 @@ from fastapi.middleware.cors import CORSMiddleware
 import uvicorn
 ## routers
 from routers.base import router as base_router
-from routers.user import router as user_router
-## db
-from db.db_engine import create_db
 
 app = FastAPI(title="Student Pilot",
               description="This API provides the main functions of Student Pilot as a service",
@@ -19,8 +16,6 @@ app.add_middleware(CORSMiddleware,
                     allow_methods=["*"],
                     allow_headers=["*"])
 app.include_router(base_router)
-app.include_router(user_router)
 
-app.add_event_handler("startup", create_db)
 if __name__ == "__main__":
     uvicorn.run(app=app,port=8000,reload=True,log_level="info")
