@@ -3,10 +3,13 @@ services:
   db:
     image: postgres:16
     restart: always
+    environment: 
+      POSTGRES_USER: ${POSTGRES_USER}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
     env_file:
       - .env
     volumes:
-      - ./init:/docker-entrypoint-initdb.d/
+      - ./db_init/init-multiple-databases.sql:/docker-entrypoint-initdb.d/init.sql
       - ./postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
@@ -32,15 +35,9 @@ services:
     env_file:
       - .env
 
-  # frontend:
-  #   build:
-  #     context: frontend
-  #     dockerfile: Dockerfile
-  #   stdin_open: true
-  #   volumes:
-  #     - "./frontend:/app:cached"
-  #     - "./frontend/node_modules:/app/node_modules:cached"
-  #   environment:
-  #     - NODE_ENV=development
-  #   ports:
-  #     - 3000:3000
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
