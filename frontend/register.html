@@ -1,37 +1,107 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="h-full bg-white">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register - Student Pilot</title>
-    <link rel="stylesheet" href="style.css">
+
+   
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <style>
+        .custom-button {
+            background-color: #0062FF;
+            border-radius: 8px;
+        }
+
+        .custom-input {
+            border-radius: 8px;
+            padding-left: 3rem; 
+            border: 1px solid #E0E0E0;
+        }
+
+        .custom-icon {
+            position: absolute;
+            left: 0.75rem;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+        }
+
+        .custom-text {
+            color: #0062FF;
+        }
+
+        .error-text {
+            color: red;
+            font-size: 0.875rem;
+        }
+    </style>
 </head>
-<body>
-    <div class="container">
-        <h1>Student Pilot</h1>
-        
-        <!-- Register Form -->
-        <div class="form-container">
-            <h2>Register</h2>
-            <form id="register">
-                <label for="firstName">First Name:</label>
-                <input type="text" id="firstName" required>
-
-                <label for="lastName">Last Name:</label>
-                <input type="text" id="lastName" required>
-
-                <label for="email">Email:</label>
-                <input type="email" id="email" required>
-
-                <label for="password">Password:</label>
-                <input type="password" id="password" required>
-
-                <button type="submit">Register</button>
-            </form>
-            <p>Already have an account? <a href="login.html">Login here</a></p>
+<body class="h-full">
+    <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
+        <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+            <h1 class="text-center text-3xl font-bold leading-9 tracking-tight custom-text">Student Pilot</h1>
+            <h2 class="mt-4 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Sign Up</h2>
         </div>
 
-        <div id="message"></div>
+        <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
+            <form class="space-y-6" id="register">
+                
+                <div>
+                    <label for="firstName" class="block text-sm font-medium leading-6 text-gray-900">First Name</label>
+                    <div class="mt-2">
+                        <input id="firstName" name="firstName" type="text" autocomplete="given-name" required
+                            class="block w-full rounded-md custom-input text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                    </div>
+                </div>
+
+                
+                <div>
+                    <label for="lastName" class="block text-sm font-medium leading-6 text-gray-900">Last Name</label>
+                    <div class="mt-2">
+                        <input id="lastName" name="lastName" type="text" autocomplete="family-name" required
+                            class="block w-full custom-input rounded-md text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                    </div>
+                </div>
+
+                
+                <div class="relative">
+                    <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email</label>
+                    <div class="mt-2 relative">
+                        <img src="EmailIcon.png" alt="Email Icon" class="custom-icon">
+                        <input id="loginEmail" name="email" type="email" placeholder="Your email" autocomplete="email" required
+                               class="block w-full custom-input text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                    </div>
+                    <p id="emailError" class="error-text"></p>
+                </div>
+
+                
+                <div class="relative">
+                    <label for="password" class="block text-sm font-medium leading-6 text-gray-900">Password</label>
+                    <div class="mt-2 relative">
+                        <img src="PassIcon.png" alt="Password Icon" class="custom-icon">
+                        <input id="loginPassword" name="password" type="password" placeholder="Password" autocomplete="current-password" required
+                               class="block w-full custom-input text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                    </div>
+                    <p id="passwordError" class="error-text"></p>
+                </div>
+
+                
+                <div>
+                    <button type="submit"
+                        class="flex w-full justify-center rounded-md custom-button px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
+                        Register
+                    </button>
+                </div>
+            </form>
+
+            <p class="mt-10 text-center text-sm text-gray-500">
+                Already have an account?
+                <a href="login.html" class="font-semibold custom-text hover:text-blue-500">Log In</a>
+            </p>
+        </div>
     </div>
 
     <script src="script.js"></script>

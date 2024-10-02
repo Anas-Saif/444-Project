@@ -1,3 +1,4 @@
+
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f4f4;
@@ -8,6 +9,7 @@ body {
     margin: 0;
 }
 
+
 .container {
     background-color: white;
     padding: 30px;
@@ -17,21 +19,26 @@ body {
     text-align: center;
 }
 
+
+h1, h2 {
+    margin-bottom: 20px;
+    font-size: 24px;
+    color: #0062FF;
+}
+
 h1 {
     margin-bottom: 30px;
 }
 
-h2 {
-    margin: 20px 0;
-    font-size: 24px;
-}
 
 label {
     display: block;
     margin-bottom: 8px;
     text-align: left;
     font-size: 14px;
+    color: #333;
 }
+
 
 input {
     width: 100%;
@@ -40,38 +47,87 @@ input {
     border: 1px solid #ccc;
     border-radius: 5px;
     font-size: 16px;
+    color: #333;
 }
 
 button {
     width: 100%;
     padding: 12px;
-    background-color: #28a745;
+    background-color: #0062FF;
     border: none;
     color: white;
     font-size: 16px;
     cursor: pointer;
-    border-radius: 5px;
+    border-radius: 8px;
+    font-weight: bold;
 }
 
+
 button:hover {
-    background-color: #218838;
+    background-color: #0053d1;
 }
+
 
 p {
     margin-top: 15px;
     font-size: 14px;
+    color: #333;
 }
 
+
 a {
-    color: #007bff;
+    color: #0062FF;
     text-decoration: none;
 }
+
 
 a:hover {
     text-decoration: underline;
 }
 
+
 #message {
     margin-top: 15px;
     color: red;
+}
+
+
+.custom-input {
+    padding-left: 3rem; 
+    border-radius: 8px;
+    border: 1px solid #E0E0E0;
+    font-size: 16px;
+}
+
+
+.custom-icon {
+    position: absolute;
+    left: 0.75rem;
+    top: 50%;
+    transform: translateY(-50%); 
+    width: 20px;
+    height: 20px;
+}
+
+
+.custom-text {
+    color: #0062FF;
+}
+
+
+.custom-link {
+    color: #0062FF;
+    text-decoration: none;
+    font-weight: bold;
+}
+
+
+.custom-button {
+    background-color: #0062FF;
+    border-radius: 8px;
+}
+
+
+.custom-button:hover {
+    background-color: #0053d1;
 }
