@@ -5,6 +5,8 @@ import uvicorn
 ## routers
 from routers.base import router as base_router
 from routers.user import router as user_router
+from routers.tasks import router as task_router
+from routers.labels import router as label_router
 ## db
 from db.db_engine import create_db
 
@@ -20,6 +22,8 @@ app.add_middleware(CORSMiddleware,
                     allow_headers=["*"])
 app.include_router(base_router)
 app.include_router(user_router)
+app.include_router(task_router)
+app.include_router(label_router)
 
 app.add_event_handler("startup", create_db)
 if __name__ == "__main__":

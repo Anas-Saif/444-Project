@@ -45,7 +45,7 @@ class Auth:
             return HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="unable to generate token")
         
     ## verify JWT token
-    async def verify_token_access(self, token: str, credentials_exception: HTTPException) -> int:
+    async def verify_token_access(self, token:str, credentials_exception: HTTPException) -> int:
         SECRET_KEY = os.getenv("SECRET_KEY")
         ALGORITHM = os.getenv("ALGORITHM")
         try:
