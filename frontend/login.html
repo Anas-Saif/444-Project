@@ -4,8 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Student Pilot</title>
-
-    
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
@@ -13,13 +11,11 @@
             background-color: #0062FF;
             border-radius: 8px;
         }
-
         .custom-input {
             border-radius: 8px;
-            padding-left: 3rem; 
+            padding-left: 3rem;
             border: 1px solid #E0E0E0;
         }
-
         .custom-icon {
             position: absolute;
             left: 0.75rem;
@@ -28,11 +24,9 @@
             width: 20px;
             height: 20px;
         }
-
         .custom-text {
             color: #0062FF;
         }
-
         .error-text {
             color: red;
             font-size: 0.875rem;
@@ -48,28 +42,25 @@
 
         <div class="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
             <form class="space-y-6" id="login">
-                
                 <div class="relative">
                     <label for="email" class="block text-sm font-medium leading-6 text-gray-900">Email</label>
                     <div class="mt-2 relative">
                         <img src="EmailIcon.png" alt="Email Icon" class="custom-icon">
                         <input id="loginEmail" name="email" type="email" placeholder="Your email" autocomplete="email" required
-                               class="block w-full custom-input text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                            class="block w-full custom-input text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
                     </div>
                 </div>
 
-                
                 <div class="relative">
                     <label for="password" class="block text-sm font-medium leading-6 text-gray-900">Password</label>
                     <div class="mt-2 relative">
                         <img src="PassIcon.png" alt="Password Icon" class="custom-icon">
                         <input id="loginPassword" name="password" type="password" placeholder="Password" autocomplete="current-password" required
-                               class="block w-full custom-input text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
+                            class="block w-full custom-input text-gray-900 shadow-sm ring-1 ring-inset placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6">
                     </div>
-                    <p id="loginError" class="error-text"></p> 
+                    <p id="loginError" class="error-text"></p>
                 </div>
 
-                
                 <div>
                     <button type="submit"
                         class="flex w-full justify-center rounded-md custom-button px-3 py-1.5 text-sm font-semibold leading-6 text-white shadow-sm hover:bg-blue-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2">
@@ -77,7 +68,6 @@
                     </button>
                 </div>
 
-                
                 <div class="text-sm text-center mt-4">
                     <a href="#" class="font-semibold custom-text hover:text-blue-500">Forgot password?</a>
                 </div>
