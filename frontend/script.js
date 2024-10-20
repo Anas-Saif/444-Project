@@ -1,9 +1,15 @@
-const BASE_URL = 'http://localhost:8000'; 
-let token = localStorage.getItem('token'); // Assuming token is stored in localStorage after login
+// Define your backend API URL
+const BASE_URL = 'http://localhost:8000'; // Replace with your actual backend API URL
 
-// --------------------- LOGIN & REGISTRATION ---------------------
+// Check if the user is logged in (only on login.html)
+if (window.location.pathname.includes('login.html')) {
+    if (localStorage.getItem('token')) {
+        // User is already logged in, redirect to main.html
+        window.location.href = 'main.html';
+    }
+}
 
-// Login functionality
+// Handle Login Form Submission
 document.getElementById('login')?.addEventListener('submit', async function (event) {
     event.preventDefault();
     const email = document.getElementById('loginEmail').value;
@@ -25,40 +31,36 @@ document.getElementById('login')?.addEventListener('submit', async function (eve
         const data = await response.json();
 
         if (response.ok) {
-            // Store token
+            // Store the access token in localStorage
             localStorage.setItem('token', data.access_token);
 
-            // Redirection to main.html page
-            window.location.href = 'main.html';  // <<< Make sure this is 'main.html'
+            // Redirect to main.html after successful login
+            window.location.href = 'main.html';
         } else {
+            // Display error message
             document.getElementById('loginError').textContent = 'Login failed. ' + (data.detail || 'Invalid credentials');
         }
     } catch (error) {
+        // Display error message if request fails
         document.getElementById('loginError').textContent = 'Error logging in: ' + error.message;
     }
 });
 
-
-// --------------------- TASKS & LABELS MANAGEMENT ---------------------
-
-// Show Task Modal
-document.getElementById('createTaskBtn')?.addEventListener('click', () => {
-    document.getElementById('taskModal').style.display = 'flex';
-});
-
-// Show Label Modal
-document.getElementById('createLabelBtn')?.addEventListener('click', () => {
-    document.getElementById('labelModal').style.display = 'flex';
-});
-
-// Close Modal (when clicking outside)
-window.addEventListener('click', function (event) {
-    if (event.target.classList.contains('modal')) {
-        event.target.style.display = 'none';
+// Ensure the user is authenticated before accessing the main page
+if (window.location.pathname.includes('main.html')) {
+    const token = localStorage.getItem('token');
+    if (!token) {
+        // No token, redirect to login.html
+        window.location.href = 'login.html';
+    } else {
+        // Fetch user info and tasks
+        fetchUser();
+        fetchTasks();
+        fetchLabels();
     }
-});
+}
 
-// Fetch and display user info
+// Fetch User Info on main.html
 async function fetchUser() {
     const response = await fetch(`${BASE_URL}/user/me`, {
         method: 'GET',
@@ -70,27 +72,7 @@ async function fetchUser() {
     document.getElementById('userName').textContent = `Welcome, ${user.first_name} ${user.last_name}`;
 }
 
-// Fetch and display labels in the task modal
-async function fetchLabels() {
-    const response = await fetch(`${BASE_URL}/labels/`, {
-        method: 'GET',
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`
-        }
-    });
-    const labels = await response.json();
-    const labelSelect = document.getElementById('taskLabel');
-    labelSelect.innerHTML = '<option value="">No Label</option>'; // Reset options
-
-    labels.forEach(label => {
-        const option = document.createElement('option');
-        option.value = label.label_id;
-        option.textContent = label.name;
-        labelSelect.appendChild(option);
-    });
-}
-
-// Fetch tasks and display them in the task list
+// Fetch Tasks
 async function fetchTasks() {
     const response = await fetch(`${BASE_URL}/tasks/`, {
         method: 'GET',
@@ -99,21 +81,40 @@ async function fetchTasks() {
         }
     });
     const tasks = await response.json();
-    const taskList = document.getElementById('taskList');
-    taskList.innerHTML = ''; // Clear existing tasks
+    displayTasks(tasks);
+}
 
-    tasks.forEach(task => {
+// Fetch Labels
+async function fetchLabels() {
+    const response = await fetch(`${BASE_URL}/labels/`, {
+        method: 'GET',
+        headers: {
+            'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+    });
+    const labels = await response.json();
+    // Populate label dropdown or other necessary areas with label data
+}
+
+// Display Tasks (with or without labels)
+function displayTasks(tasks) {
+    const taskList = document.getElementById('taskList');
+    taskList.innerHTML = ''; // Clear current tasks
+    tasks.forEach((task) => {
         const taskCard = document.createElement('div');
-        taskCard.className = `task-card ${task.labels.length ? '' : 'task-gray'}`;
+        taskCard.classList.add('task-card'); // You can style this class in your CSS
+
+        // Set background color based on label color or default to grey
+        const taskLabelColor = task.labels.length ? task.labels[0].color : '#f5f5f5';
+        taskCard.style.backgroundColor = taskLabelColor;
+
         taskCard.innerHTML = `
-            <h3 class="font-bold">${task.title}</h3>
+            <h3>${task.title}</h3>
             <p>${task.description || 'No description'}</p>
             <p>Due in: ${getDaysRemaining(task.due_date)} days</p>
         `;
 
-        taskCard.addEventListener('click', () => {
-            alert(`Task: ${task.title}\nDue: ${task.due_date}\nPriority: ${task.priority || 'Not set'}`);
-        });
+        taskCard.addEventListener('click', () => showTaskInfo(task)); // Show task info modal
 
         taskList.appendChild(taskCard);
     });
@@ -128,74 +129,121 @@ function getDaysRemaining(dueDate) {
     return differenceInDays;
 }
 
-// Save new task
-document.getElementById('saveTaskBtn')?.addEventListener('click', async () => {
-    const taskTitle = document.getElementById('taskTitle').value;
-    const taskDueDate = document.getElementById('taskDueDate').value;
+// Show task info modal
+function showTaskInfo(task) {
+    document.getElementById('taskInfoTitle').textContent = `Task: ${task.title}`;
+    document.getElementById('taskInfoDue').textContent = `Due: ${task.due_date}`;
+    document.getElementById('taskInfoPriority').textContent = `Priority: ${task.priority || 'Not set'}`;
+    document.getElementById('infoModal').style.display = 'flex';
 
-    if (!taskTitle || !taskDueDate) {
-        alert('Please fill in the required fields: Task Title and Due Date.');
+    document.getElementById('deleteTaskBtn').onclick = () => deleteTask(task.task_id);
+    document.getElementById('updateTaskBtn').onclick = () => updateTask(task);
+}
+
+// Delete task
+async function deleteTask(taskId) {
+    if (confirm("Are you sure you want to delete this task?")) {
+        await fetch(`${BASE_URL}/tasks/${taskId}`, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`
+            }
+        });
+        alert('Task successfully deleted!');
+        document.getElementById('infoModal').style.display = 'none'; // Close modal
+        fetchTasks(); // Refresh tasks
+    }
+}
+
+// Update task - opens the task modal pre-filled with task info
+function updateTask(task) {
+    document.getElementById('taskTitle').value = task.title;
+    document.getElementById('taskDescription').value = task.description;
+    document.getElementById('taskDueDate').value = task.due_date;
+    document.getElementById('taskPriority').value = task.priority || 'Low';
+    document.getElementById('taskModal').style.display = 'flex'; // Open modal for update
+
+    // Save the update
+    document.getElementById('saveTaskBtn').onclick = async function () {
+        const updatedTaskData = {
+            title: document.getElementById('taskTitle').value,
+            description: document.getElementById('taskDescription').value,
+            due_date: document.getElementById('taskDueDate').value,
+            priority: document.getElementById('taskPriority').value
+        };
+
+        await fetch(`${BASE_URL}/tasks/${task.task_id}`, {
+            method: 'PUT',
+            headers: {
+                'Authorization': `Bearer ${localStorage.getItem('token')}`,
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(updatedTaskData)
+        });
+
+        document.getElementById('taskModal').style.display = 'none'; // Hide modal
+        fetchTasks(); // Refresh task list
+    };
+}
+
+// Logout function to remove token and redirect to login
+document.getElementById('logoutBtn')?.addEventListener('click', () => {
+    localStorage.removeItem('token');  // Clear the token from localStorage
+    window.location.href = 'login.html';  // Redirect to login page
+});
+
+// Handle Register Form Submission
+document.getElementById('register')?.addEventListener('submit', async function (event) {
+    event.preventDefault();
+
+    // Get user input
+    const firstName = document.getElementById('firstName').value;
+    const lastName = document.getElementById('lastName').value;
+    const email = document.getElementById('loginEmail').value;
+    const password = document.getElementById('loginPassword').value;
+
+    // Clear error messages
+    document.getElementById('emailError').textContent = '';
+    document.getElementById('passwordError').textContent = '';
+
+    // Simple validation for password length (custom logic)
+    if (password.length < 6) {
+        document.getElementById('passwordError').textContent = 'Password must be at least 6 characters long';
         return;
     }
 
-    const taskData = {
-        title: taskTitle,
-        description: document.getElementById('taskDescription').value,
-        due_date: taskDueDate,
-        labels: [document.getElementById('taskLabel').value], // List of label IDs
-        priority: document.getElementById('taskPriority').value
+    // User data to send
+    const userData = {
+        first_name: firstName,
+        last_name: lastName,
+        email: email,
+        password: password
     };
 
-    await fetch(`${BASE_URL}/tasks/`, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(taskData)
-    });
+    try {
+        const response = await fetch(`${BASE_URL}/user/singup`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(userData)
+        });
 
-    document.getElementById('taskModal').style.display = 'none'; // Hide modal
-    fetchTasks(); // Refresh task list
-});
+        const data = await response.json();
 
-// Save new label
-document.getElementById('saveLabelBtn')?.addEventListener('click', async () => {
-    const labelName = document.getElementById('labelName').value;
-    const labelColor = document.getElementById('labelColor').value;
-
-    if (!labelName || !labelColor) {
-        alert('Please fill in the required fields: Label Name and Color.');
-        return;
+        if (response.ok) {
+            alert('Registration successful! Redirecting to login page...');
+            window.location.href = 'login.html';  // Redirect to login page
+        } else {
+            // Check if email already exists or other validation error
+            if (data.detail && data.detail.includes("unable to create user")) {
+                document.getElementById('emailError').textContent = 'The email is already registered.';
+            } else {
+                document.getElementById('emailError').textContent = data.detail || 'Unable to create user';
+            }
+        }
+    } catch (error) {
+        // Handle any errors that occur during the fetch
+        document.getElementById('emailError').textContent = 'Error registering: ' + error.message;
     }
-
-    const labelData = {
-        name: labelName,
-        color: labelColor
-    };
-
-    await fetch(`${BASE_URL}/labels/`, {
-        method: 'POST',
-        headers: {
-            'Authorization': `Bearer ${localStorage.getItem('token')}`,
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(labelData)
-    });
-
-    document.getElementById('labelModal').style.display = 'none'; // Hide modal
-    fetchLabels(); // Refresh label list in task modal
 });
-
-// --------------------- ON PAGE LOAD ---------------------
-
-// Initialize the page by fetching tasks, labels, and user info
-window.onload = () => {
-    if (!token) {
-        window.location.href = 'login.html'; // Redirect to login if no token is found
-    } else {
-        fetchUser();
-        fetchLabels();
-        fetchTasks();
-    }
-};
