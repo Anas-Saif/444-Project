@@ -7,6 +7,31 @@
     <script src="https://cdn.tailwindcss.com"></script>
 
     <style>
+
+        body {
+            background-color: rgba(153, 202, 251, 0.368);
+            display: flex;
+             align-items: center;
+            justify-content: center;
+
+        }
+
+        .container{
+            
+            height: 700px;
+            width: 700px !important;
+            
+            background: rgba(255, 255, 255, 0.447);
+            box-shadow: rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            padding: 50px;
+        }
+
+        .con {
+            width: 100%;
+        }
+
         .custom-button {
             background-color: #0062FF;
             border-radius: 8px;
@@ -34,8 +59,8 @@
     </style>
 </head>
 <body class="h-full">
-    <div class="flex min-h-full flex-col justify-center px-6 py-12 lg:px-8">
-        <div class="sm:mx-auto sm:w-full sm:max-w-sm">
+    <div class="container">
+        <div class="con">
             <h1 class="text-center text-3xl font-bold leading-9 tracking-tight custom-text">Student Pilot</h1>
             <h2 class="mt-4 text-center text-2xl font-bold leading-9 tracking-tight text-gray-900">Sign Up</h2>
         </div>

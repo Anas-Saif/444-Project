@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Pilot</title>
+    <style>
+        /* Reset some default styles */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background-color: rgba(153, 202, 251, 0.368);
+            color: #333;
+        }
+
+        /* Navigation Bar */
+        nav {
+            color: #000000;
+            font-weight: bold;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        nav .logo {
+            font-size: 2.2em;
+            font-weight: bold;
+        }
+
+        nav ul {
+            list-style: none;
+            display: flex;
+            gap: 20px;
+        }
+
+        nav ul li a {
+            
+            text-decoration: none;
+            font-size: 1.1em;
+        }
+
+        /* Hero Section */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: rgba(255, 255, 255, 0.447);
+            box-shadow: rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
+            padding: 100px 20px;
+            text-align: center;
+        }
+
+        .hero h1 {
+            font-size: 3.5em;
+            color: #333;
+        }
+
+        .hero p {
+            font-size: 1.2em;
+            color: #666;
+            margin-top: 20px;
+            max-width: 600px;
+        }
+
+        .hero .cta-btn {
+            margin-top: 30px;
+            padding: 15px 40px;
+            font-size: 1.2em;
+            background-color: #0062FF;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .hero .cta-btn:hover {
+            background-color: #155cb0;
+        }
+
+        /* Features Section */
+        .features {
+            display: flex;
+            justify-content: space-around;
+            padding: 50px;
+            
+        }
+
+        .feature {
+            padding: 10px;
+            margin-right: 10px;
+            height: 300px;
+            text-align: center;
+            max-width: 440px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.447);
+            box-shadow: rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
+        }
+
+        .feature img {
+            margin-top: 50px;
+            width: 80px;
+            margin-bottom: 20px;
+        }
+
+        .feature h3 {
+            font-size: 1.5em;
+            margin-bottom: 10px;
+        }
+
+        .feature p {
+            font-size: 1.1em;
+            color: #555;
+        }
+
+        /* Footer */
+        footer {
+            
+            
+            text-align: center;
+            padding: 20px;
+        }
+
+        footer p {
+            margin: 10px 0;
+        }
+
+        footer a {
+            
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navigation -->
+    <nav>
+        <div class="logo">Student Pilot</div>
+        
+    </nav>
+
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Take Control of Your Student Life</h1>
+        <p>Student Pilot helps you organize tasks, manage deadlines, and stay on top of your studies. Say goodbye to stress and hello to productivity.</p>
+        <a href="login.html"><button class="cta-btn" onclick="location.href='#login'">Get Started</button></a>
+    </section>
+
+    <!-- Features Section -->
+    <section id="features" class="features">
+        <div class="feature">
+            <img src="https://img.icons8.com/ios-filled/100/000000/to-do.png" alt="To-do list">
+            <h3>Task Management</h3>
+            <p>Create, organize, and manage tasks efficiently to never miss a deadline again.</p>
+        </div>
+        <div class="feature">
+            <img src="./app-removebg-preview.png" alt="Scheduling">
+            <h3>Calendar Integration</h3>
+            <p>Sync your tasks with Google Calendar and stay ahead of your schedule.</p>
+        </div>
+        <div class="feature">
+            <img src="https://img.icons8.com/ios-filled/100/000000/goal.png" alt="Goals">
+            <h3>Stay on Track</h3>
+            <p>Set goals, track your progress, and get reminders to keep moving forward.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2024 Student Pilot | All rights reserved.</p>
+    </footer>
+
+</body>
+</html>

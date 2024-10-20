@@ -1,0 +1,318 @@
+* {
+    font-family: "Noto Sans TC", sans-serif;
+    margin: 0;
+    padding: 0;
+  }
+  body {
+    background-color: rgba(153, 202, 251, 0.368);
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-start;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+  }
+  
+  /* to do container */
+  .container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    margin: 100px auto;
+    min-height: 400px;
+    min-width: 640px;
+    max-width: 1000px;
+    background: rgba(255, 255, 255, 0.447);
+    box-shadow: rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    padding: 50px;
+    margin-bottom: 30px; /* Added space between task container and calendar */
+  }
+  
+  /* Calendar container */
+  .calendar-container {
+    width: 95%; /* Almost the full width of the page */
+    max-width: 1200px;
+    background: rgba(255, 255, 255, 0.447);
+    box-shadow: rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
+    border-radius: 10px;
+    border: 1px solid rgba(255, 255, 255, 0.18);
+    padding: 30px;
+    margin-top: 40px;
+  }
+  
+  #calendar {
+    max-width: 100%;
+    height: 80vh; /* Calendar height will take 80% of the viewport height */
+    background-color: white;
+  }
+  
+  /* Default button style */
+  button.add-todo:hover {
+    background-color: #01245c;
+    cursor: pointer;
+  }
+  
+  button.delete-todo:hover {
+    background-color: red;
+  }
+  
+  h3,h2 {
+    font-size: 35px;
+    color: rgb(0, 0, 0);
+    text-align: center;
+  }
+
+  h2 {
+    margin-top: 50px;
+  }
+  
+  /* Add task row */
+  .todo-name {
+    font-size: 18px;
+    border-radius: 20px;
+    height: 40px;
+    padding: 0 20px;
+    border-style: none;
+    background-color: rgba(255, 255, 255, 0.536);
+    border: 2px solid rgba(70, 70, 70, 0.873);
+    margin-left: 5px;
+  }
+  
+  .todo-due-date {
+    font-size: 18px;
+    height: 40px;
+    width: 120px;
+    padding: 0 20px;
+    border-style: none;
+    background-color: rgba(255, 255, 255, 0.536);
+    border: 2px solid rgba(70, 70, 70, 0.873);
+    border-radius: 20px;
+    margin-left: 5px;
+  }
+  
+  
+  
+  .add-todo {
+    grid-column: 1 / 5; /* Span all three columns to take full width */
+    justify-self: center; /* Center the button horizontally */
+    width:200px;
+    font-size: 18px;
+    height: 40px;
+    padding: 0 20px;
+    border-style: none;
+    background-color: #0062FF;
+    color: white;
+    border-radius: 20px;
+    margin-top: 10px;
+  }
+  
+  .todo-priority {
+    font-size: 18px;
+    height: 40px;
+    width: 130px;
+    padding: 0 5px;
+    border-style: none;
+    background-color: rgba(255, 255, 255, 0.536);
+    border: 2px solid rgba(70, 70, 70, 0.873);
+    border-radius: 20px;
+    margin-right: 10px;
+  }
+  
+  .todo-priority:hover {
+    cursor: pointer;
+  }
+  
+  /* Adjust form input gaps */
+  .main {
+    display: grid;
+    grid-template-columns: 300px auto auto auto;
+    margin-top: 20px;
+    margin-bottom: 20px;
+    column-gap: 25px;
+    row-gap: 5px;
+  }
+  
+  
+  
+  
+  
+  .todos {
+    text-align: center;
+    margin: 0;
+    padding: 0;
+    width: 100%;
+  }
+  
+  .todo_box {
+    display: grid;
+    align-items: center;
+    margin-top: 10px;
+    margin-bottom: 10px;
+    padding: 10px;
+    border-left: 5px solid green;
+    border-radius: 10px;
+    background-color: rgba(255, 255, 255, 0.8);
+    margin-left: 0;
+  }
+  
+  .high-priority {
+    border-left-color: red;
+  }
+  
+  .medium-priority {
+    border-left-color: orange;
+  }
+  
+  .low-priority {
+    border-left-color: green;
+  }
+  
+  .todo-date {
+    font-size: 16px;
+    padding: 5px;
+    color: #333;
+    border: 1px solid rgba(200, 200, 200, 0.5);
+    border-radius: 5px;
+    text-align: center;
+    min-width: 100px;
+    margin-right: 15px;
+  }
+  
+  .delete-todo {
+    background-color: #ff6b6b;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 15px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-left: 15px;
+    text-align: center;
+    min-width: 80px;
+  }
+  
+  .completed {
+    background-color: #f0f0f0;
+    color: #aaa;
+  }
+  
+  .completed .todo-small-name {
+    text-decoration: line-through;
+    color: inherit;
+  }
+  
+  .completed .todo-date {
+    color: #aaa;
+  }
+  
+  .todo-small-name {
+    margin-left: 10px;
+  }
+  
+  .filter-bar {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 20px;
+  }
+  
+  .filter-bar label {
+    margin: 0 10px;
+    font-size: 18px;
+    color: #333;
+  }
+  
+  .filter-bar input[type="radio"] {
+    margin-right: 5px;
+  }
+  
+  .complete-todo {
+    height: 20px;
+  }
+  
+  .complete-todo:hover {
+    cursor: pointer;
+  }
+  
+  .todo-description {
+    font-size: 18px;
+    border-radius: 20px;
+    height: 40px;
+    padding: 0 20px;
+    border-style: none;
+    background-color: rgba(255, 255, 255, 0.536);
+    border: 2px solid rgba(70, 70, 70, 0.873);
+  }
+  
+  .task-description.hidden {
+    display: none;
+  }
+  
+  .task-description:not(.hidden) {
+    display: block;
+  }
+  
+  .toggle-description {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 18px;
+    margin-left: 10px;
+    color: #333;
+  }
+  
+  .todo-header {
+    display: grid;
+    grid-template-columns: 50px auto 110px 100px 80px;
+    align-items: center;
+  }
+  
+   .completed-event {
+    background-color: #d3d3d3 !important; 
+    border-color: #d3d3d3 !important;
+  }  
+  
+  .task-description {
+    margin-top: 10px;
+    padding: 10px;
+    background-color: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    display: none;
+  }
+  
+  .hide-calendar {
+    display: none;
+  }
+
+  .btn {
+    background-color: #0062FF;
+    color: white;
+    border: none;
+    border-radius: 20px;
+    padding: 8px 15px;
+    cursor: pointer;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    margin-left: 15px;
+    text-align: center;
+    min-width: 100px;
+    height: 40px;
+    font-size: 17px;
+  }
+
+  .btn:hover {
+    background-color: #01245c;
+  }
+
+  .logout {
+    
+    top:15px;
+    right: 40px;
+    position: fixed;
+  }
+
+  h2 {
+
+  }
