@@ -174,7 +174,7 @@ class TaskService:
                 if not task:
                     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
 
-                task.is_completed = True
+                task.is_completed = not task.is_completed
                 task.updated_at = datetime.now(self.timezone)
 
                 await session.commit()

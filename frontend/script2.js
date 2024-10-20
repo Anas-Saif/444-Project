@@ -1,4 +1,3 @@
-const todos = JSON.parse(localStorage.getItem('saved-todos')) || [];
 let currentFilter = 'all'; // Set the default filter to 'all'
 
 const addTodoButton = document.querySelector('.add-todo');
@@ -11,7 +10,9 @@ const todosList = document.querySelector('.todos');
 let calendar; // Declare calendar globally
 
 // FullCalendar initialization
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
+  await fetchTodos();
+  let todos = JSON.parse(localStorage.getItem('saved-todos')) || [];
   let calendarEl = document.getElementById('calendar');
 
   // Initialize FullCalendar
@@ -29,10 +30,11 @@ document.addEventListener('DOMContentLoaded', function() {
   calendar.render();
 
   addTodoButton.addEventListener('click', addTodo);
+  renderTodos();
 });
 
 // Render tasks and add event listeners for filters
-renderTodos();
+
 
 // Add filter listeners
 document.querySelectorAll('input[name="filter"]').forEach(radio => {
@@ -42,7 +44,9 @@ document.querySelectorAll('input[name="filter"]').forEach(radio => {
   });
 });
 
-function renderTodos() {
+async function renderTodos() {
+  let todos = JSON.parse(localStorage.getItem('saved-todos')) || [];
+
   if (todos.length === 0) {
     todosList.innerHTML = `<tr><td colspan="5" class="text-center">No Tasks</td></tr>`;
     return;
@@ -52,32 +56,26 @@ function renderTodos() {
   
   // Apply the current filter
   if (currentFilter === 'incomplete') {
-    filteredTodos = todos.filter(todo => !todo.completed); // Only show incomplete tasks
+    filteredTodos = todos.filter(todo => !todo.is_completed); // Only show incomplete tasks
   }
 
   let todosHTML = '';
 
   filteredTodos.forEach(function(todoObject, i) {
-    const { name, dueDate, completed, description, showDescription, priority } = todoObject;
-
-    const checked = completed ? 'checked' : '';
-    const completedClass = completed ? 'completed' : '';
+    const {task_id,title, formatted_due_date, is_completed, description, showDescription, priority } = todoObject;
+    const checked = is_completed ? 'checked' : '';
+    const completedClass = is_completed ? 'completed' : '';
     const descriptionVisibility = showDescription ? '' : 'hidden';
     const arrowDirection = showDescription ? '⬆️' : '⬇️';
 
     const html = `
-    <div class="todo_box ${completedClass}" style="border-left: 5px solid ${getPriorityColor(priority)};">
+    <div class="todo_box ${completedClass}" value=${task_id} style="border-left: 5px solid ${getPriorityColor(priority)};">
       <div class="todo-header">
-        <input type="checkbox" class="complete-todo" data-id="${i}" ${checked}>
-        <div class="todo todo-small-name">${name}</div>
-        <div class="todo todo-date">${dueDate}</div>
-        <button class="delete-todo" onclick="
-          todos.splice(${i}, 1);
-          renderTodos();
-          localStorage.setItem('saved-todos', JSON.stringify(todos));
-          updateCalendarEvents(); // Update calendar after deletion
-        ">Delete</button>
-        <button class="toggle-description" onclick="toggleDescription(${i})">${arrowDirection}</button>
+        <input type="checkbox" onchange="toggleCompleteTask(${task_id})" class="complete-todo" data-id="${task_id}" ${checked}>
+        <div class="todo todo-small-name">${title}</div>
+        <div class="todo todo-date">${formatted_due_date}</div>
+        <button class="delete-todo" onclick="deleteTask(${task_id})">Delete</button>
+        <button class="toggle-description" onclick="toggleDescription(${task_id})">${arrowDirection}</button>
       </div>
       <div class="task-description ${descriptionVisibility}">
         ${description || 'No description provided.'}
@@ -90,21 +88,17 @@ function renderTodos() {
   todosList.innerHTML = todosHTML;
 
   const checkboxes = document.querySelectorAll('.complete-todo');
-  checkboxes.forEach(checkbox => {
-    checkbox.addEventListener('change', function() {
-      const index = this.getAttribute('data-id');
-      toggleCompleteTask(index);
-    });
-  });
 }
 
-function toggleCompleteTask(index) {
-  // Toggle the completed status
-  todos[index].completed = !todos[index].completed;
-
-  // Update the tasks in local storage
-  localStorage.setItem('saved-todos', JSON.stringify(todos));
-
+async function toggleCompleteTask(id) {
+res= await fetch(`http://localhost:8000/tasks/${id}/complete`, {
+    method: 'PATCH',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  });
+  await fetchTodos();
   // Re-render the tasks
   renderTodos();
 
@@ -112,18 +106,35 @@ function toggleCompleteTask(index) {
   updateCalendarEvents();
 }
 
-function toggleDescription(index) {
+async function toggleDescription(id) {
   // Toggle the showDescription flag
-  todos[index].showDescription = !todos[index].showDescription;
-
+  let todos = JSON.parse(localStorage.getItem('saved-todos'));
+  const index = todos.findIndex(todo => todo.task_id === id);
+  if (index !== -1) {
+    todos[index].showDescription = !todos[index].showDescription;
+    localStorage.setItem('saved-todos', JSON.stringify(todos));}
   // Update the tasks in local storage
-  localStorage.setItem('saved-todos', JSON.stringify(todos));
-
+  
   // Re-render the tasks
   renderTodos();
 }
+async function deleteTask(id) {
+  res= await fetch(`http://localhost:8000/tasks/${id}`, {
+    method: 'DELETE',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  });
+  await fetchTodos();
+  // Re-render the tasks
+  renderTodos();
 
-function addTodo() {
+  // Re-render the calendar to reflect the changes
+  updateCalendarEvents();
+}
+
+async function addTodo() {
   const todo = todoName.value;
   const todoDuedate = todoDuedateElement.value;
   const todoDescription = todoDescriptionElement.value;
@@ -134,22 +145,45 @@ function addTodo() {
     return;
   }
 
-  todos.push({
-    name: todo,
-    dueDate: todoDuedate,
+  request = {
+    title: todo,
     description: todoDescription,
-    priority: todoPriority, 
-    completed: false,
-    showDescription: false
+    due_date: todoDuedate,
+    priority: todoPriority
+  };
+
+  res= await fetch('http://localhost:8000/tasks', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    },
+    body: JSON.stringify(request)
   });
+
+  if (res.status !== 201) {
+    alert('Failed to add task');
+    return;
+  }
+
+
+
+  // todos.push({
+  //   name: todo,
+  //   dueDate: todoDuedate,
+  //   description: todoDescription,
+  //   priority: todoPriority, 
+  //   completed: false,
+  //   showDescription: false
+  // });
 
   todoName.value = '';
   todoDuedateElement.value = '';
   todoDescriptionElement.value = '';
   todoPriorityElement.value = 'low'; // Reset priority to default
-
+  await fetchTodos();
   renderTodos();
-  localStorage.setItem('saved-todos', JSON.stringify(todos));
+  // localStorage.setItem('saved-todos', JSON.stringify(todos));
 
   // Update the calendar after adding a new todo
   updateCalendarEvents();
@@ -158,11 +192,11 @@ function addTodo() {
 // Helper function to get the color based on priority
 function getPriorityColor(priority) {
   switch (priority) {
-    case 'high':
+    case 'High':
       return 'red';
-    case 'medium':
+    case 'Medium':
       return 'orange';
-    case 'low':
+    case 'Low':
       return 'green';
     default:
       return '';
@@ -194,3 +228,29 @@ document.getElementById('logoutBtn').addEventListener('click', () => {
 document.getElementById('closeInfoModal').addEventListener('click', () => {
   document.getElementById('infoModal').style.display = 'none'; // Close task info modal
 });
+
+// Function to format date
+function formatDate(dateString) {
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${day}-${month}-${year}`;
+}
+// Function to fetch todos
+async function fetchTodos() {
+  res = await fetch('http://localhost:8000/tasks', {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  }).then(res => res.json())
+  .then(data => {
+    todos = data.map(todo => ({
+      ...todo,
+      formatted_due_date: formatDate(todo.due_date) // Add formatted date
+    }));
+    localStorage.setItem('saved-todos', JSON.stringify(todos));
+  });
+}
