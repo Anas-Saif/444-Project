@@ -9,18 +9,19 @@ const todosList = document.querySelector('.todos');
 
 let calendar; // Declare calendar globally
 
+
+
 // FullCalendar initialization
 document.addEventListener('DOMContentLoaded', async function() {
   await fetchTodos();
   let todos = JSON.parse(localStorage.getItem('saved-todos')) || [];
   let calendarEl = document.getElementById('calendar');
-
   // Initialize FullCalendar
   calendar = new FullCalendar.Calendar(calendarEl, {
     initialView: 'dayGridMonth',
     events: todos.map(todo => ({
-      title: todo.name,
-      start: todo.dueDate,
+      title: todo.title,
+      start: todo.formatted_due_date,
       backgroundColor: getPriorityColor(todo.priority), // Apply color based on priority
       borderColor: todo.completed ? '#d3d3d3' : '', // Grey out completed tasks
       classNames: todo.completed ? 'completed-event' : '' // Custom class for completed tasks
@@ -54,6 +55,7 @@ function renderTodos() {
   // Loop through each task to render it with the edit functionality
   todos.forEach(function(todoObject) {
       const { task_id, title, formatted_due_date, is_completed, description, priority, showDescription } = todoObject;
+      const formattedDueDateEdit = formatDateEdit(formatted_due_date);
 
       // Set up checked status for completed tasks and CSS class for completed appearance
       const checked = is_completed ? 'checked' : '';
@@ -78,8 +80,8 @@ function renderTodos() {
           <!-- Hidden edit section for updating task details -->
           <div id="edit-section-${task_id}" class="edit-section hidden">
               <input type="text" id="editName-${task_id}" value="${title}" placeholder="Task Name" class="todo-name">
-              <input type="date" id="editDueDate-${task_id}" value="${formatted_due_date}" class="todo-due-date">
-              <input type="text" id="editDescription-${task_id}" placeholder="${description}" class="todo-description">
+              <input type="date" id="editDueDate-${task_id}" value="${formattedDueDateEdit}" class="todo-due-date" placeholder="${formattedDueDateEdit}">
+              <input type="text" id="editDescription-${task_id}" value="${description}"  placeholder="Enter Description" class="todo-description">
               <select id="editPriority-${task_id}" class="todo-priority">
                   <option value="Low" ${priority === 'Low' ? 'selected' : ''}>Low</option>
                   <option value="Medium" ${priority === 'Medium' ? 'selected' : ''}>Medium</option>
@@ -111,11 +113,22 @@ async function saveEdit(taskId) {
       priority: document.getElementById(`editPriority-${taskId}`).value
   };
 
+
+  if (!updatedTask.title || !updatedTask.due_date) {
+      alert('Please enter a task and due date!');
+      return;
+  }
+
   // Call the updateTask function to send the changes to the backend
   await updateTask(taskId, updatedTask);
-
+  
   // Refresh tasks after saving
-  await fetchTasks();
+  await fetchTodos();
+
+  // Re-render the tasks
+  renderTodos();
+
+  updateCalendarEvents();
 }
 
 
@@ -296,12 +309,12 @@ function getPriorityColor(priority) {
 function updateCalendarEvents() {
   // Clear all events first
   calendar.getEvents().forEach(event => event.remove());
-
+  todos = JSON.parse(localStorage.getItem('saved-todos')) || [];
   // Add updated todos as events
   todos.forEach(function(todo) {
     calendar.addEvent({
-      title: todo.name,
-      start: todo.dueDate,
+      title: todo.title,
+      start: todo.formatted_due_date,
       backgroundColor: getPriorityColor(todo.priority), // Apply color based on priority
       borderColor: todo.completed ? '#d3d3d3' : '', // Grey out completed tasks
       classNames: todo.completed ? 'completed-event' : '' // Add class if task is completed
@@ -325,7 +338,16 @@ function formatDate(dateString) {
   const year = date.getFullYear();
   const month = String(date.getMonth() + 1).padStart(2, '0');
   const day = String(date.getDate()).padStart(2, '0');
-  return `${day}-${month}-${year}`;
+  return `${year}-${month}-${day}`;
+}
+
+// Function to format date for editing yyyy-mm-dd
+function formatDateEdit(dateString) {
+  const date = new Date(dateString);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 }
 // Function to fetch todos
 async function fetchTodos() {
