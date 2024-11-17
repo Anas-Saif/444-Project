@@ -15,14 +15,15 @@
   
   /* to do container */
   .container {
+    width: 95%; /* Almost the full width of the page */
     display: flex;
     align-items: center;
     justify-content: center;
     flex-direction: column;
-    margin: 100px auto;
+    /* margin: 100px auto; */
     min-height: 400px;
     min-width: 640px;
-    max-width: 1000px;
+    max-width: 1200px;
     background: rgba(255, 255, 255, 0.447);
     box-shadow: rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
     border-radius: 10px;
@@ -39,7 +40,7 @@
     box-shadow: rgb(204, 219, 232) 3px 3px 6px 0px inset, rgba(255, 255, 255, 0.5) -3px -3px 6px 1px inset;
     border-radius: 10px;
     border: 1px solid rgba(255, 255, 255, 0.18);
-    padding: 30px;
+    padding: 50px;
     margin-top: 40px;
   }
   
@@ -259,7 +260,6 @@
     border: none;
     cursor: pointer;
     font-size: 18px;
-    margin-left: 10px;
     color: #333;
   }
   
@@ -325,6 +325,41 @@
   border: 1px solid #ddd;
   border-radius: 5px;
 }
+
+.edit-todo {
+  background-color: orange;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 15px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  margin-left: 15px;
+  text-align: center;
+  min-width: 80px;
+}
+
+.edit-todo:hover {
+  background-color: rgba(226, 154, 19);  
+}
+
+.save-todo {
+  background-color: #0062FF;
+  color: white;
+  border: none;
+  border-radius: 20px;
+  padding: 8px 15px;
+  cursor: pointer;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+  margin-left: 15px;
+  text-align: center;
+  min-width: 80px;
+}
+
+.save-todo:hover {
+  background-color: #01245c;
+}
+
 
   
   /* h2 {

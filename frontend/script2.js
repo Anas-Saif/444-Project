@@ -41,6 +41,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 document.querySelectorAll('input[name="filter"]').forEach(radio => {
   radio.addEventListener('change', function () {
     currentFilter = this.value; // Update the current filter
+    localStorage.setItem('currentFilter', currentFilter); // Save the filter to localStorage
     renderTodos(); // Re-render tasks based on the selected filter
   });
 });
@@ -48,6 +49,7 @@ document.querySelectorAll('input[name="filter"]').forEach(radio => {
 function renderTodos() {
   // Retrieve tasks from localStorage or another storage method
   let todos = JSON.parse(localStorage.getItem('saved-todos')) || [];
+  const currentFilter = localStorage.getItem('currentFilter') || 'all';
 
   // Clear the current list of tasks in the DOM
   todosList.innerHTML = '';
@@ -63,9 +65,10 @@ function renderTodos() {
       const descriptionVisibility = showDescription ? '' : 'hidden';
       const arrowDirection = showDescription ? '⬆️' : '⬇️';
 
+
       // Define the HTML for each task item, including edit and delete options
       const taskHTML = `
-      <div class="todo_box ${completedClass}" value="${task_id}" style="border-left: 5px solid ${getPriorityColor(priority)};">
+      <div class="todo_box ${completedClass}" value="${task_id}" style=" display:${currentFilter === 'incomplete' && is_completed ? 'none!important': 'grid'} ;border-left: 5px solid ${getPriorityColor(priority)};">
           <div class="todo-header">
               <input type="checkbox" onchange="toggleCompleteTask(${task_id})" class="complete-todo" data-id="${task_id}" ${checked}>
               <div class="todo todo-small-name">${title}</div>
