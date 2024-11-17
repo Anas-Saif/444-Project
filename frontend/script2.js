@@ -1,5 +1,8 @@
 let currentFilter = 'all'; // Set the default filter to 'all'
-const API_ENDPOINT = process.env.API_ENDPOINT || 'http://localhost:8000'; // Define the API endpoint
+
+const script = document.createElement('script');
+script.src = 'config.js';
+document.head.appendChild(script);
 
 const addTodoButton = document.querySelector('.add-todo');
 const todoName = document.querySelector('.todo-name');

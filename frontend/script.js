@@ -1,5 +1,7 @@
 // Define your backend API URL
-API_ENDPOINT = process.env.API_ENDPOINT || 'http://localhost:8000';
+const script = document.createElement('script');
+script.src = 'config.js';
+document.head.appendChild(script);
 // Check if the user is logged in (only on login.html)
 if (window.location.pathname.includes('login.html')) {
     if (localStorage.getItem('token')) {
