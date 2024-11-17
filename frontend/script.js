@@ -2,6 +2,7 @@
 const script = document.createElement('script');
 script.src = 'config.js';
 document.head.appendChild(script);
+
 // Check if the user is logged in (only on login.html)
 if (window.location.pathname.includes('login.html')) {
     if (localStorage.getItem('token')) {

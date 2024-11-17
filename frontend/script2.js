@@ -1,8 +1,5 @@
 let currentFilter = 'all'; // Set the default filter to 'all'
 
-const script = document.createElement('script');
-script.src = 'config.js';
-document.head.appendChild(script);
 
 const addTodoButton = document.querySelector('.add-todo');
 const todoName = document.querySelector('.todo-name');
@@ -17,25 +14,53 @@ let calendar; // Declare calendar globally
 
 // FullCalendar initialization
 document.addEventListener('DOMContentLoaded', async function() {
-  await fetchTodos();
-  let todos = JSON.parse(localStorage.getItem('saved-todos')) || [];
-  let calendarEl = document.getElementById('calendar');
-  // Initialize FullCalendar
-  calendar = new FullCalendar.Calendar(calendarEl, {
-    initialView: 'dayGridMonth',
-    events: todos.map(todo => ({
-      title: todo.title,
-      start: todo.formatted_due_date,
-      backgroundColor: getPriorityColor(todo.priority), // Apply color based on priority
-      borderColor: todo.completed ? '#d3d3d3' : '', // Grey out completed tasks
-      classNames: todo.completed ? 'completed-event' : '' // Custom class for completed tasks
-    }))
-  });
+  if (!window.API_ENDPOINT) {
+    const script = document.createElement('script');
+    script.src = 'config.js';
+    document.head.appendChild(script);
 
-  calendar.render();
+    script.onload = async () => {
+      await fetchTodos();
+      let todos = JSON.parse(localStorage.getItem('saved-todos')) || [];
+      let calendarEl = document.getElementById('calendar');
+      // Initialize FullCalendar
+      calendar = new FullCalendar.Calendar(calendarEl, {
+        initialView: 'dayGridMonth',
+        events: todos.map(todo => ({
+          title: todo.title,
+          start: todo.formatted_due_date,
+          backgroundColor: getPriorityColor(todo.priority), // Apply color based on priority
+          borderColor: todo.completed ? '#d3d3d3' : '', // Grey out completed tasks
+          classNames: todo.completed ? 'completed-event' : '' // Custom class for completed tasks
+        }))
+      });
 
-  addTodoButton.addEventListener('click', addTodo);
-  renderTodos();
+      calendar.render();
+
+      addTodoButton.addEventListener('click', addTodo);
+      renderTodos();
+    };
+  } else {
+    await fetchTodos();
+    let todos = JSON.parse(localStorage.getItem('saved-todos')) || [];
+    let calendarEl = document.getElementById('calendar');
+    // Initialize FullCalendar
+    calendar = new FullCalendar.Calendar(calendarEl, {
+      initialView: 'dayGridMonth',
+      events: todos.map(todo => ({
+        title: todo.title,
+        start: todo.formatted_due_date,
+        backgroundColor: getPriorityColor(todo.priority), // Apply color based on priority
+        borderColor: todo.completed ? '#d3d3d3' : '', // Grey out completed tasks
+        classNames: todo.completed ? 'completed-event' : '' // Custom class for completed tasks
+      }))
+    });
+
+    calendar.render();
+
+    addTodoButton.addEventListener('click', addTodo);
+    renderTodos();
+  }
 });
 
 // Render tasks and add event listeners for filters
