@@ -7,6 +7,9 @@ COPY ./ /usr/share/nginx/html/
 # Add a script to set environment variables
 COPY ./set-env.sh /docker-entrypoint.d/
 
+# Ensure the script is executable
+RUN chmod +x /docker-entrypoint.d/set-env.sh
+
 # Set environment variables
 ARG API_ENDPOINT
 ENV API_ENDPOINT=${API_ENDPOINT}
