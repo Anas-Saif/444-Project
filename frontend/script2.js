@@ -1,4 +1,5 @@
 let currentFilter = 'all'; // Set the default filter to 'all'
+const API_ENDPOINT = process.env.API_ENDPOINT || 'http://localhost:8000'; // Define the API endpoint
 
 const addTodoButton = document.querySelector('.add-todo');
 const todoName = document.querySelector('.todo-name');
@@ -137,7 +138,7 @@ async function saveEdit(taskId) {
 
 async function updateTask(taskId, updatedData) {
   const token = localStorage.getItem('token');
-  const response = await fetch(`http://localhost:8000/tasks/${taskId}`, {
+  const response = await fetch(`${API_ENDPOINT}/tasks/${taskId}`, {
       method: 'PUT',
       headers: {
           'Content-Type': 'application/json',
@@ -197,7 +198,7 @@ async function updateTask(taskId, updatedData) {
 
 
 async function toggleCompleteTask(id) {
-res= await fetch(`http://localhost:8000/tasks/${id}/complete`, {
+res= await fetch(`${API_ENDPOINT}/tasks/${id}/complete`, {
     method: 'PATCH',
     headers: {
       'Content-Type': 'application/json',
@@ -225,7 +226,7 @@ async function toggleDescription(id) {
   renderTodos();
 }
 async function deleteTask(id) {
-  res= await fetch(`http://localhost:8000/tasks/${id}`, {
+  res= await fetch(`${API_ENDPOINT}/tasks/${id}`, {
     method: 'DELETE',
     headers: {
       'Content-Type': 'application/json',
@@ -258,7 +259,7 @@ async function addTodo() {
     priority: todoPriority
   };
 
-  res= await fetch('http://localhost:8000/tasks', {
+  res= await fetch(`${API_ENDPOINT}/tasks`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -354,7 +355,7 @@ function formatDateEdit(dateString) {
 }
 // Function to fetch todos
 async function fetchTodos() {
-  res = await fetch('http://localhost:8000/tasks', {
+  res = await fetch(`${API_ENDPOINT}/tasks`, {
     method: 'GET',
     headers: {
       'Content-Type': 'application/json',

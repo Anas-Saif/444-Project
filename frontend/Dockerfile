@@ -4,6 +4,10 @@ FROM nginx:alpine
 # Copy the frontend files to the default Nginx public directory
 COPY ./ /usr/share/nginx/html/
 
+# Set environment variables
+ARG API_ENDPOINT
+ENV API_ENDPOINT=${API_ENDPOINT}
+
 # Expose port 80
 EXPOSE 80
 

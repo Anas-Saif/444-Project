@@ -1,6 +1,5 @@
 // Define your backend API URL
-const BASE_URL = 'http://localhost:8000'; // Replace with your actual backend API URL
-
+API_ENDPOINT = process.env.API_ENDPOINT || 'http://localhost:8000';
 // Check if the user is logged in (only on login.html)
 if (window.location.pathname.includes('login.html')) {
     if (localStorage.getItem('token')) {
@@ -20,7 +19,7 @@ document.getElementById('login')?.addEventListener('submit', async function (eve
     formData.append('password', password);
 
     try {
-        const response = await fetch(`${BASE_URL}/user/login`, {
+        const response = await fetch(`${API_ENDPOINT}/user/login`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded'
@@ -94,7 +93,7 @@ document.getElementById('register')?.addEventListener('submit', async function (
     };
 
     try {
-        const response = await fetch(`${BASE_URL}/user/singup`, {
+        const response = await fetch(`${API_ENDPOINT}/user/singup`, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'

@@ -43,3 +43,5 @@ services:
       - "3000:80"
     volumes:
       - ./frontend:/usr/share/nginx/html
+    environment:
+      - API_ENDPOINT = http://localhost:8000
