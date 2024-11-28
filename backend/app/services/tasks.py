@@ -12,12 +12,16 @@ from db.schema import Task, Label
 ## models
 from models.req.task import TaskCreate, TaskUpdate
 from models.res.task import TaskOut
+## services
+from services.google_calendar import GoogleCalendarService
 
 
 class TaskService:
     def __init__(self):
         self.db_session: AsyncSession = DB_session()
         self.timezone = pytz.timezone('Asia/Riyadh')
+        self.google_calendar_service = GoogleCalendarService()
+
 
     async def convert_to_riyadh_TZ(self, dt: datetime) -> datetime:
         if dt.tzinfo is None:
@@ -56,6 +60,10 @@ class TaskService:
                 await session.commit()
                 # Eagerly load labels
                 await session.refresh(new_task, ['labels'])
+
+                user= await self.google_calendar_service.get_user(session, user_id)
+                await self.google_calendar_service.sync_task_with_google_calendar(session,new_task,user,'create')
+                await session.commit()
                 return new_task
             except Exception as e:
                 await session.rollback()
@@ -135,6 +143,10 @@ class TaskService:
                 await session.commit()
                 # Eagerly load labels
                 await session.refresh(task, ['labels'])
+
+                user = await self.google_calendar_service.get_user(session, user_id)
+                await self.google_calendar_service.sync_task_with_google_calendar(session,task, user, 'update')
+                await session.commit()
                 return task
             except HTTPException as e:
                 await session.rollback()
@@ -155,6 +167,9 @@ class TaskService:
                     raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Task not found")
 
                 await session.delete(task)
+                await session.commit()
+                user= await self.google_calendar_service.get_user(session, user_id)
+                await self.google_calendar_service.sync_task_with_google_calendar(session,task, user, 'delete')
                 await session.commit()
             except HTTPException as e:
                 await session.rollback()

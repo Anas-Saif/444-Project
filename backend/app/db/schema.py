@@ -21,7 +21,7 @@ class User(Base):
     first_name: Mapped[str] = mapped_column(String(50), nullable=False)
     last_name: Mapped[str] = mapped_column(String(50), nullable=False)
     password_hash: Mapped[str] = mapped_column(String(255), nullable=False)
-    google_token: Mapped[str | None] = mapped_column(String(255), nullable=True)
+    google_token: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[DateTime] = mapped_column(
         DateTime(timezone=True), server_default=func.now()
     )
@@ -46,6 +46,7 @@ class Task(Base):
     __tablename__ = 'tasks'
 
     task_id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    google_event_id: Mapped[str | None] = mapped_column(String(255), nullable=True) 
     title: Mapped[str] = mapped_column(String(500), nullable=False)
     description: Mapped[str | None] = mapped_column(String(1000), nullable=True)
     due_date: Mapped[DateTime] = mapped_column(DateTime(timezone=True), nullable=False)

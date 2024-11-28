@@ -16,6 +16,7 @@ class LabelOut(BaseModel):
 
 class TaskOut(BaseModel):
     task_id: int
+    google_event_id: Optional[str]
     title: str
     description: Optional[str]
     due_date: datetime

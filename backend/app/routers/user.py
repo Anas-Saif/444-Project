@@ -9,6 +9,7 @@ from models.res.user import User as user_model
 ## services
 from services.users import Users
 from services.Auth import Auth
+from fastapi import Response
 ## dependency
 async def get_users_service():
     return Users()
@@ -31,6 +32,8 @@ async def signup_user(user: user_signup_model,users:Users=Depends(get_users_serv
 @router.post("/login",status_code=status.HTTP_200_OK,response_model=token_model)
 async def login_user(loginform:OAuth2PasswordRequestForm = Depends(),users:Users=Depends(get_users_service)):
     login_metadata = await users.login_user(loginform)
+    response = Response()
+    response.headers["Authorization"] = f"Bearer {login_metadata.access_token}"
     return login_metadata
 
 @router.get("/me",status_code=status.HTTP_200_OK,response_model=user_model)
