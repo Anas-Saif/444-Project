@@ -68,6 +68,7 @@ class Auth:
     
     async def get_current_user_cookie(self, request: Request) -> int:
         token = request.cookies.get("token")
+        print (request.cookies)
         if not token:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
