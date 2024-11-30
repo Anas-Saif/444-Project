@@ -54,6 +54,7 @@ document.addEventListener('DOMContentLoaded', async function() {
         if (googleSyncToggle.checked) {
            // Get the current domain
           const domain = window.location.hostname;
+          const token = localStorage.getItem('token');
           // Set cookie with proper security attributes
           document.cookie = `token=${token}; path=/; domain=${domain}; Secure; SameSite=Strict`;
           const url = `${API_ENDPOINT}/auth/google`;
@@ -94,6 +95,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     syncButton.addEventListener('click', () => {
      // Get the current domain
+    token = localStorage.getItem('token');
     const domain = window.location.hostname;
      // Set cookie with proper security attributes
     document.cookie = `token=${token}; path=/; domain=${domain}; Secure; SameSite=Strict`;
