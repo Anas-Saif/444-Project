@@ -11,7 +11,6 @@ const todosList = document.querySelector('.todos');
 let calendar; // Declare calendar globally
 
 
-
 // FullCalendar initialization
 document.addEventListener('DOMContentLoaded', async function() {
   if (!window.API_ENDPOINT) {
@@ -39,6 +38,30 @@ document.addEventListener('DOMContentLoaded', async function() {
 
       addTodoButton.addEventListener('click', addTodo);
       renderTodos();
+      const googleSync = await checkGoogleSync();
+      if (!googleSync) {
+        document.getElementById('popup-container').style.display = 'flex';
+      }
+
+      // Update the Google sync toggle based on the user's sync status
+      const googleSyncToggle = document.getElementById('google-sync-toggle');
+      const googleSyncStatus = document.getElementById('google-sync-status');
+      googleSyncToggle.checked = googleSync;
+      googleSyncStatus.textContent = googleSync ? 'Synced' : 'Not Synced';
+      googleSyncStatus.style.color = googleSync ? 'green' : 'red';
+
+      googleSyncToggle.addEventListener('change', async function() {
+        if (googleSyncToggle.checked) {
+          // Sync with Google Calendar
+          document.cookie = `token=${localStorage.getItem('token')}; path=/`;
+          const url = `${API_ENDPOINT}/auth/google`;
+          window.open(url, '_blank');
+        } else {
+          // Unsync with Google Calendar
+          await unsyncGoogleCalendar();
+          googleSyncStatus.textContent = 'Not Synced';
+        }
+      });
     };
   } else {
     await fetchTodos();
@@ -60,8 +83,44 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     addTodoButton.addEventListener('click', addTodo);
     renderTodos();
+
   }
+
+    const closeButton = document.getElementById('close-btn');
+    const googleSyncContainer = document.getElementById('popup-container');
+    syncButton = document.getElementById('sync-btn');
+    
+    syncButton.addEventListener('click', () => {
+    document.cookie = `token=${localStorage.getItem('token')}; path=/`;
+    window.open(`${API_ENDPOINT}/auth/google`, '_blank');});
+
+    closeButton.addEventListener('click', function() {
+      googleSyncContainer.style.display = 'none';
+  });
+
 });
+
+// check if the user has synced their google calendar
+const checkGoogleSync = async () => {
+  const data = await fetch(`${API_ENDPOINT}/user/me`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  }).then(res => res.json());
+  return data.google_sync;
+}
+const unsyncGoogleCalendar = async () => {
+  const data = await fetch(`${API_ENDPOINT}/user/disable_google_sync`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${localStorage.getItem('token')}`
+    }
+  }).then(res => res.json());
+  return ;
+}
 
 // Render tasks and add event listeners for filters
 

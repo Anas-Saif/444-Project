@@ -6,6 +6,7 @@ class User(BaseModel):
     email: str
     first_name: str
     last_name: str
+    google_sync: bool
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"

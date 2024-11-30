@@ -11,8 +11,8 @@ class LabelOut(BaseModel):
     name: str
     color: Optional[str] = None
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
+    model_config['from_attributes']=True
 
 class TaskOut(BaseModel):
     task_id: int
@@ -22,8 +22,8 @@ class TaskOut(BaseModel):
     due_date: datetime
     is_completed: bool
     priority: Optional[PriorityLevel]
-    created_at: datetime
-    updated_at: datetime
+    created_at: Optional[datetime]
+    updated_at: Optional[datetime]
     labels: Optional[List[LabelOut]] = None
 
     model_config = ConfigDict(from_attributes=True)
@@ -38,5 +38,5 @@ class TaskOut(BaseModel):
 class LabelOut(LabelBase):
     label_id: int
 
-    class Config:
-        orm_mode = True
+    model_config = ConfigDict(from_attributes=True)
+    model_config['from_attributes']=True

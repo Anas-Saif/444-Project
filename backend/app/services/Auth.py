@@ -4,7 +4,7 @@ import jwt
 from jwt import PyJWTError
 import os
 import datetime
-from fastapi import HTTPException,Depends,status
+from fastapi import HTTPException,Depends,status,Request
 from fastapi.security import OAuth2PasswordBearer
 ## services
 
@@ -63,5 +63,21 @@ class Auth:
         credentials_exception = HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
                                             detail="Could not Validate Credentials",
                                             headers={"WWW-Authenticate": "Bearer"})
+        user_id = await self.verify_token_access(token, credentials_exception)
+        return user_id
+    
+    async def get_current_user_cookie(self, request: Request) -> int:
+        token = request.cookies.get("token")
+        if not token:
+            raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Could not validate credentials",
+                headers={"WWW-Authenticate": "Bearer"}
+            )
+        credentials_exception = HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"}
+        )
         user_id = await self.verify_token_access(token, credentials_exception)
         return user_id

@@ -18,7 +18,7 @@ from services.google_calendar import GoogleCalendarService
 
 class TaskService:
     def __init__(self):
-        self.db_session: AsyncSession = DB_session()
+        self.db_session: AsyncSession = DB_session
         self.timezone = pytz.timezone('Asia/Riyadh')
         self.google_calendar_service = GoogleCalendarService()
 
@@ -29,9 +29,10 @@ class TaskService:
             dt = dt.replace(tzinfo=pytz.utc)
         return dt.astimezone(self.timezone)
 
-    async def create_task(self, user_id: int, task_data: TaskCreate) -> Task:
-        async with self.db_session as session:
+    async def create_task(self, user_id: int, task_data: TaskCreate) -> TaskOut:
+        async with self.db_session() as session:  # Call DB_session as a function
             try:
+                # Fetch labels
                 labels = []
                 if task_data.labels:
                     result = await session.execute(
@@ -47,15 +48,22 @@ class TaskService:
                             detail="One or more labels not found or unauthorized"
                         )
 
+                # Create new task with timezone-aware dates
+                due_date = task_data.due_date.replace(tzinfo=pytz.UTC).astimezone(self.timezone)
+                now = datetime.now(self.timezone)
+
                 new_task = Task(
                     title=task_data.title,
                     description=task_data.description,
-                    due_date=task_data.due_date,
+                    due_date=due_date,
                     is_completed=task_data.is_completed,
                     priority=task_data.priority,
                     user_id=user_id,
-                    labels=labels
+                    labels=labels,
+                    created_at=now,
+                    updated_at=now
                 )
+                
                 session.add(new_task)
                 await session.commit()
                 # Eagerly load labels
@@ -64,13 +72,15 @@ class TaskService:
                 user= await self.google_calendar_service.get_user(session, user_id)
                 await self.google_calendar_service.sync_task_with_google_calendar(session,new_task,user,'create')
                 await session.commit()
-                return new_task
             except Exception as e:
+                print(f"Error creating task: {str(e)}")
                 await session.rollback()
-                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
-
+                raise HTTPException(
+                    status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, 
+                    detail=str(e)
+                )
     async def get_tasks(self, user_id: int) -> List[Task]:
-        async with self.db_session as session:
+        async with self.db_session() as session:
             try:
                 result = await session.execute(
                     select(Task)
@@ -87,7 +97,7 @@ class TaskService:
                 raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
     async def get_task(self, user_id: int, task_id: int) -> Task:
-        async with self.db_session as session:
+        async with self.db_session() as session:
             try:
                 result = await session.execute(
                     select(Task)
@@ -108,7 +118,7 @@ class TaskService:
                 raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
     async def update_task(self, user_id: int, task_id: int, task_data: TaskUpdate) -> Task:
-        async with self.db_session as session:
+        async with self.db_session() as session:
             try:
                 # Fetch the task
                 result = await session.execute(
@@ -156,7 +166,7 @@ class TaskService:
                 raise HTTPException(status_code=500, detail=str(e))
 
     async def delete_task(self, user_id: int, task_id: int):
-        async with self.db_session as session:
+        async with self.db_session() as session:
             try:
                 # Fetch the task
                 result = await session.execute(
@@ -179,7 +189,7 @@ class TaskService:
                 raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
     async def mark_task_completed(self, user_id: int, task_id: int) -> Task:
-        async with self.db_session as session:
+        async with self.db_session() as session:
             try:
                 # Fetch the task
                 result = await session.execute(

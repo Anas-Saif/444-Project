@@ -51,7 +51,15 @@ class Users():
                 stmnt = select(User).where(User.user_id == id)
                 result = await session.execute(stmnt)
                 result= result.scalars().first()
-                user = user_model(user_id=result.user_id,email=result.email,first_name=result.first_name,last_name=result.last_name)
+                googel_sync = False
+                if result.google_token != None:
+                    googel_sync = True 
+
+                user = user_model(user_id=result.user_id,
+                                  email=result.email,
+                                  first_name=result.first_name,
+                                  last_name=result.last_name,
+                                  google_sync=googel_sync)
                 return user
         except Exception as e:
             raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="unable to fetch user")
@@ -66,4 +74,15 @@ class Users():
         access_token= token_model(access_token=access_token,token_type= "bearer")
         # user= user_model(user_id=user.user_id,email=user.email,first_name=user.first_name,last_name=user.last_name)
         return access_token
+    
+    async def disable_google_sync(self,user_id:int):
+        try:
+            async with self.db_session as session:
+                stmnt = select(User).where(User.user_id == user_id)
+                result = await session.execute(stmnt)
+                user = result.scalars().first()
+                user.google_token = None
+                await session.commit()
+        except Exception as e:
+            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail="unable to disable google sync")
 

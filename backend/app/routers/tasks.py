@@ -21,7 +21,7 @@ RIYADH_TZ = pytz.timezone('Asia/Riyadh')
 router = APIRouter(prefix="/tasks", tags=["tasks"])
 
 
-@router.post("/", response_model=TaskOut, status_code=status.HTTP_201_CREATED)
+@router.post("/", status_code=status.HTTP_201_CREATED)
 async def create_task(
     task_data: TaskCreate,
     user_id: int = Depends(auth_service.get_current_user),

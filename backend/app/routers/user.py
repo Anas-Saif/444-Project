@@ -40,3 +40,8 @@ async def login_user(loginform:OAuth2PasswordRequestForm = Depends(),users:Users
 async def get_user_me(user_id:int=Depends(auth_service.get_current_user),users:Users=Depends(get_users_service)):
     user= await users.get_user_by_id(user_id)
     return user
+
+@router.put('/disable_google_sync',status_code=status.HTTP_200_OK)
+async def disable_google_sync(user_id:int=Depends(auth_service.get_current_user),users:Users=Depends(get_users_service)):
+    await users.disable_google_sync(user_id)
+    return {"message":"Google sync disabled successfully"}

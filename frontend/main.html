@@ -10,13 +10,39 @@
 
 </head>
 <body>
-    
-    <div class = "logout">
-        
-        <button id="logoutBtn" class="btn">Logout</button>
-    </div>
-    <h2>Student Pilot</h2>
 
+   <!-- Navigation Bar -->
+   <nav class="navbar">
+    <h2>Student Pilot</h2>
+    <div class="navbar-right">
+        <div class="google-sync-container">
+            <img src="google-calendar.png" alt="Google Calendar" class="google-calendar-icon">
+            <label class="switch">
+                <input type="checkbox" id="google-sync-toggle">
+                <span class="slider round"></span>
+            </label>
+            <span id="google-sync-status" style="margin-left: 5px;">Not Synced</span>
+        </div>
+        <div class="logout">
+            <button id="logoutBtn" class="btn">Logout</button>
+        </div>
+    </div>
+</nav>
+  
+    <div class="popup-container" id="popup-container">
+        <div class="popup">
+          <button id="close-btn" class="close-btn">&times;</button> 
+            <img src="./google-calendar.png" alt="">
+            <h2>your calendar not Synced with Google Calendar</h2>
+            <div class="buttons-container">
+
+            <button id="sync-btn">Sync with google</button>         
+          </div>
+            
+        </div>
+    </div>
+    
+  
     
   <div class="container">
     <h3>Goals</h3>
@@ -46,6 +72,7 @@
     <h3>Calendar View</h3>
     <div id="calendar"></div>
   </div>
+
 
   <!-- FullCalendar JS -->
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@5.11.0/main.min.js"></script>

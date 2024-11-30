@@ -13,6 +13,7 @@ from fastapi import HTTPException, status
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from db.schema import Task, User
+from db.db_engine import DB_session
 
 class GoogleCalendarService:
     def __init__(self):
@@ -26,7 +27,7 @@ class GoogleCalendarService:
             }
         }
         self.scopes = ['https://www.googleapis.com/auth/calendar']
-
+        self.db_session: AsyncSession = DB_session()
     async def get_authorization_url(self, state: Optional[str] = None) -> str:
         flow = Flow.from_client_config(
             self.client_config,
@@ -42,36 +43,38 @@ class GoogleCalendarService:
         )
         return authorization_url
 
-    async def fetch_and_store_credentials(self, session: AsyncSession, user_id: int, code: str, state: Optional[str] = None):
-        flow = Flow.from_client_config(
-            self.client_config,
-            scopes=self.scopes,
-            state=state
-        )
-        flow.redirect_uri = getenv("GOOGLE_REDIRECT_URI")
+    async def fetch_and_store_credentials(self, user_id: int, code: str, state: Optional[str] = None):
+        async with self.db_session as session:
 
-        flow.fetch_token(code=code)
-        credentials = flow.credentials
+            flow = Flow.from_client_config(
+                self.client_config,
+                scopes=self.scopes,
+                state=state
+            )
+            flow.redirect_uri = getenv("GOOGLE_REDIRECT_URI")
 
-        # Serialize credentials
-        creds_data = {
-            "token": credentials.token,
-            "refresh_token": credentials.refresh_token,
-            "token_uri": credentials.token_uri,
-            "client_id": credentials.client_id,
-            "client_secret": credentials.client_secret,
-            "scopes": credentials.scopes,
-        }
+            flow.fetch_token(code=code)
+            credentials = flow.credentials
 
-        try:
-            user = await self.get_user(session, user_id)
-            user.google_token = json.dumps(creds_data)
-            await session.commit()
-            # Perform initial synchronization
-            await self.initial_sync(session, user)
-        except Exception as e:
-            await session.rollback()
-            raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
+            # Serialize credentials
+            creds_data = {
+                "token": credentials.token,
+                "refresh_token": credentials.refresh_token,
+                "token_uri": credentials.token_uri,
+                "client_id": credentials.client_id,
+                "client_secret": credentials.client_secret,
+                "scopes": credentials.scopes,
+            }
+
+            try:
+                user = await self.get_user(session, user_id)
+                user.google_token = json.dumps(creds_data)
+                await session.commit()
+                # Perform initial synchronization
+                await self.initial_sync(session, user)
+            except Exception as e:
+                await session.rollback()
+                raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
 
     async def initial_sync(self, session: AsyncSession, user: User):
         tasks = await self._get_user_tasks(session, user.user_id)
