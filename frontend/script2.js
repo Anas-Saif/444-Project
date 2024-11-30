@@ -52,8 +52,10 @@ document.addEventListener('DOMContentLoaded', async function() {
 
       googleSyncToggle.addEventListener('change', async function() {
         if (googleSyncToggle.checked) {
-          // Sync with Google Calendar
-          document.cookie = `token=${localStorage.getItem('token')}; path=/`;
+           // Get the current domain
+          const domain = window.location.hostname;
+          // Set cookie with proper security attributes
+          document.cookie = `token=${token}; path=/; domain=${domain}; Secure; SameSite=Strict`;
           const url = `${API_ENDPOINT}/auth/google`;
           window.open(url, '_blank');
         } else {
@@ -91,7 +93,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     syncButton = document.getElementById('sync-btn');
     
     syncButton.addEventListener('click', () => {
-    document.cookie = `token=${localStorage.getItem('token')}; path=/`;
+     // Get the current domain
+    const domain = window.location.hostname;
+     // Set cookie with proper security attributes
+    document.cookie = `token=${token}; path=/; domain=${domain}; Secure; SameSite=Strict`;
     window.open(`${API_ENDPOINT}/auth/google`, '_blank');});
 
     closeButton.addEventListener('click', function() {
