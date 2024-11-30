@@ -14,6 +14,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from db.schema import Task, User
 from db.db_engine import DB_session
+from services.Auth import Auth
 
 class GoogleCalendarService:
     def __init__(self):
@@ -28,6 +29,7 @@ class GoogleCalendarService:
         }
         self.scopes = ['https://www.googleapis.com/auth/calendar']
         self.db_session: AsyncSession = DB_session()
+        self.auth_service = Auth()
     async def get_authorization_url(self, state: Optional[str] = None) -> str:
         flow = Flow.from_client_config(
             self.client_config,
@@ -43,7 +45,7 @@ class GoogleCalendarService:
         )
         return authorization_url
 
-    async def fetch_and_store_credentials(self, user_id: int, code: str, state: Optional[str] = None):
+    async def fetch_and_store_credentials(self, code: str, state: Optional[str] = None):
         async with self.db_session as session:
 
             flow = Flow.from_client_config(
@@ -67,7 +69,7 @@ class GoogleCalendarService:
             }
 
             try:
-                user = await self.get_user(session, user_id)
+                user = await self.get_user(session, user_id=int(state))
                 user.google_token = json.dumps(creds_data)
                 await session.commit()
                 # Perform initial synchronization

@@ -53,11 +53,15 @@ document.addEventListener('DOMContentLoaded', async function() {
       googleSyncToggle.addEventListener('change', async function() {
         if (googleSyncToggle.checked) {
            // Get the current domain
-          const domain = window.location.hostname;
           const token = localStorage.getItem('token');
-          // Set cookie with proper security attributes
-          document.cookie = `token=${token}; path=/; domain=${domain}; Secure; SameSite=Strict`;
-          const url = `${API_ENDPOINT}/auth/google`;
+          url = await fetch(`${API_ENDPOINT}/auth/google`,{
+            method: 'GET',
+            headers: {
+              'Content-Type': 'application/json',
+              'authorization': `Bearer ${token}`
+            }
+          }).then(res => res.json().then(data => data.url));
+          // Open the Google OAuth URL in a new tab
           window.open(url, '_blank');
         } else {
           // Unsync with Google Calendar
@@ -93,13 +97,18 @@ document.addEventListener('DOMContentLoaded', async function() {
     const googleSyncContainer = document.getElementById('popup-container');
     syncButton = document.getElementById('sync-btn');
     
-    syncButton.addEventListener('click', () => {
-     // Get the current domain
-    token = localStorage.getItem('token');
-    const domain = window.location.hostname;
-     // Set cookie with proper security attributes
-    document.cookie = `token=${token}; path=/; domain=${domain}; Secure; SameSite=Strict`;
-    window.open(`${API_ENDPOINT}/auth/google`, '_blank');});
+    syncButton.addEventListener('click', async () => {
+      const token = localStorage.getItem('token');
+      url = await fetch(`${API_ENDPOINT}/auth/google`,{
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'authorization': `Bearer ${token}`
+        }
+      }).then(res => res.json().then(data => data.url));
+      // Open the Google OAuth URL in a new tab
+      window.open(url, '_blank');
+    });
 
     closeButton.addEventListener('click', function() {
       googleSyncContainer.style.display = 'none';
