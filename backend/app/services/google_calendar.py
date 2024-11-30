@@ -74,6 +74,7 @@ class GoogleCalendarService:
                 await session.commit()
                 # Perform initial synchronization
                 await self.initial_sync(session, user)
+                await session.commit()
             except Exception as e:
                 await session.rollback()
                 raise HTTPException(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, detail=str(e))
@@ -129,9 +130,6 @@ class GoogleCalendarService:
             if task.google_event_id:
                 service.events().delete(calendarId='primary', eventId=task.google_event_id).execute()
                 task.google_event_id = None
-
-        # No need to add the task to the session; it's already attached
-        # Changes will be committed when the session commits
 
     def build_event_body(self, task: Task) -> dict:
         event_body = {
