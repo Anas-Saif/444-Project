@@ -23,6 +23,25 @@
             </label>
             <span id="google-sync-status" style="margin-left: 5px;">Not Synced</span>
         </div>
+        <!-- notifications icon -->
+        <div class="notificaitons-container">
+            <img src="bell.png" alt="Notifications" class="notifications-icon">
+            <span class="notifications-count" id="notifications-count">0</span>
+        </div>
+
+                <!-- Notifications Modal -->
+        <div id="notifications-modal" class="modal">
+          <div class="modal-content">
+            <div class="modal-content-header">
+              <h2>Notifications</h2>
+              <button id="close-btn-notifications" class="close-btn">&times;</button> 
+            </div>
+              <ul id="notifications-list">
+                  <!-- Notifications will be dynamically added here -->
+              </ul>
+          </div>
+        </div>
+
         <div class="logout">
             <button id="logoutBtn" class="btn">Logout</button>
         </div>

@@ -8,7 +8,9 @@ const todoDescriptionElement = document.querySelector('.todo-description'); // D
 const todoPriorityElement = document.querySelector('.todo-priority'); // Priority input
 const todosList = document.querySelector('.todos');
 
+
 let calendar; // Declare calendar globally
+
 
 
 // FullCalendar initialization
@@ -17,6 +19,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     const script = document.createElement('script');
     script.src = 'config.js';
     document.head.appendChild(script);
+
 
     script.onload = async () => {
       await fetchTodos();
@@ -38,6 +41,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
       addTodoButton.addEventListener('click', addTodo);
       renderTodos();
+      await generate_notifications_list()
       const googleSync = await checkGoogleSync();
       if (!googleSync) {
         document.getElementById('popup-container').style.display = 'flex';
@@ -90,6 +94,7 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     addTodoButton.addEventListener('click', addTodo);
     renderTodos();
+    await generate_notifications_list()
 
   }
 
@@ -112,7 +117,19 @@ document.addEventListener('DOMContentLoaded', async function() {
 
     closeButton.addEventListener('click', function() {
       googleSyncContainer.style.display = 'none';
-  });
+    });
+  
+  const notif = document.querySelector(".notifications-icon"); 
+
+  notif.addEventListener('click', function () {
+  document.querySelector(".modal").style.display = "block";
+  })
+
+  const close = document.querySelector("#close-btn-notifications");
+
+  close.addEventListener('click', function () {
+    document.querySelector(".modal").style.display = "none";
+  })
 
 });
 
@@ -143,10 +160,11 @@ const unsyncGoogleCalendar = async () => {
 
 // Add filter listeners
 document.querySelectorAll('input[name="filter"]').forEach(radio => {
-  radio.addEventListener('change', function () {
+  radio.addEventListener('change', async function () {
     currentFilter = this.value; // Update the current filter
     localStorage.setItem('currentFilter', currentFilter); // Save the filter to localStorage
     renderTodos(); // Re-render tasks based on the selected filter
+    await generate_notifications_list()  
   });
 });
 
@@ -154,9 +172,24 @@ function renderTodos() {
   // Retrieve tasks from localStorage or another storage method
   let todos = JSON.parse(localStorage.getItem('saved-todos')) || [];
   const currentFilter = localStorage.getItem('currentFilter') || 'all';
+  const progress_text= document.getElementById('progress-percentage');
+  const progress_bar= document.getElementById('progress-bar');
 
   // Clear the current list of tasks in the DOM
   todosList.innerHTML = '';
+
+  let totalTasks = todos.length;
+  let completedTasks = 0;
+  todos.forEach((task) =>{
+    if(task.is_completed){
+      completedTasks++;
+    }
+  })
+  let progress = Math.round((completedTasks/totalTasks)*100);
+  progress = isNaN(progress) ? 0 : progress;
+  progress_text.innerHTML = `${progress} %`;
+  progress_bar.style.width = `${progress}%`;
+
 
   // Loop through each task to render it with the edit functionality
   todos.forEach(function(todoObject) {
@@ -234,9 +267,11 @@ async function saveEdit(taskId) {
 
   // Re-render the tasks
   renderTodos();
-
+  await generate_notifications_list()
   updateCalendarEvents();
 }
+
+
 
 
 async function updateTask(taskId, updatedData) {
@@ -311,6 +346,7 @@ res= await fetch(`${API_ENDPOINT}/tasks/${id}/complete`, {
   await fetchTodos();
   // Re-render the tasks
   renderTodos();
+  await generate_notifications_list()
 
   // Re-render the calendar to reflect the changes
   updateCalendarEvents();
@@ -327,6 +363,7 @@ async function toggleDescription(id) {
   
   // Re-render the tasks
   renderTodos();
+  await generate_notifications_list()
 }
 async function deleteTask(id) {
   res= await fetch(`${API_ENDPOINT}/tasks/${id}`, {
@@ -339,6 +376,7 @@ async function deleteTask(id) {
   await fetchTodos();
   // Re-render the tasks
   renderTodos();
+  await generate_notifications_list()
 
   // Re-render the calendar to reflect the changes
   updateCalendarEvents();
@@ -393,6 +431,7 @@ async function addTodo() {
   todoPriorityElement.value = 'low'; // Reset priority to default
   await fetchTodos();
   renderTodos();
+  await generate_notifications_list()
   // localStorage.setItem('saved-todos', JSON.stringify(todos));
 
   // Update the calendar after adding a new todo
@@ -472,4 +511,69 @@ async function fetchTodos() {
     }));
     localStorage.setItem('saved-todos', JSON.stringify(todos));
   });
+}
+
+async function generate_notifications_1day() {
+  let todos = JSON.parse(localStorage.getItem('saved-todos')) || [];
+  let notifications = [];
+  todos.forEach(todo => {
+    const dueDate = new Date(todo.due_date);
+    const currentDate = new Date();
+    const timeDifference = dueDate - currentDate;
+    const daysDifference = timeDifference / (1000 * 3600 * 24);
+
+    if (daysDifference <= 1 && daysDifference >= 0 && !todo.is_completed) {
+      notifications.push(todo);
+    }
+  });
+  return notifications;
+}
+
+async function generate_notifications_late() {
+  let todos = JSON.parse(localStorage.getItem('saved-todos')) || [];
+  let notifications = [];
+  todos.forEach(todo => {
+    const dueDate = new Date(todo.due_date);
+    const currentDate = new Date();
+
+    if (dueDate < currentDate && !todo.is_completed) {
+      notifications.push(todo);
+    }
+  });
+  return notifications;
+}
+
+async function generate_notifications_list() {
+  const notifications1day = await generate_notifications_1day();
+  const notificationsLate = await generate_notifications_late();
+  const notificationsList = document.getElementById('notifications-list');
+  const notificationsCount = document.getElementById('notifications-count');
+  notificationsList.innerHTML = '';
+  let notifications = [];
+  notificationsLate.forEach(todo => {
+    const {title, formatted_due_date} = todo;
+    list_element = document.createElement('li');
+    list_element.textContent = `${title} is late and was due on ${formatted_due_date}`;
+    list_element.classList.add('late-notification');
+    notifications.push(list_element);
+  });
+
+  notifications1day.forEach(todo => {
+    const {title, formatted_due_date} = todo;
+    list_element = document.createElement('li');
+    list_element.textContent = `${title} is due tomorrow on ${formatted_due_date}`;
+    list_element.classList.add('oneDay-notification');
+    notifications.push(list_element);
+  });
+
+notificationsList.append(...notifications);
+if (notifications.length === 0) {
+  notificationsCount.style.display = 'none';
+}
+else {
+notificationsCount.textContent = notifications.length;
+notificationsCount.style.display = 'block';
+}
+
+
 }
