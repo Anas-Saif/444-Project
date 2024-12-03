@@ -11,6 +11,8 @@ const todosList = document.querySelector('.todos');
 let calendar; // Declare calendar globally
 
 
+
+
 // FullCalendar initialization
 document.addEventListener('DOMContentLoaded', async function() {
   if (!window.API_ENDPOINT) {
@@ -151,56 +153,47 @@ document.querySelectorAll('input[name="filter"]').forEach(radio => {
 });
 
 function renderTodos() {
-  // Retrieve tasks from localStorage or another storage method
   let todos = JSON.parse(localStorage.getItem('saved-todos')) || [];
   const currentFilter = localStorage.getItem('currentFilter') || 'all';
 
   // Clear the current list of tasks in the DOM
   todosList.innerHTML = '';
 
-  // Loop through each task to render it with the edit functionality
+  // Variables to track the progress
+  let totalTasks = todos.length;
+  let completedTasks = todos.filter(todo => todo.is_completed).length;
+  let progress = totalTasks === 0 ? 0 : (completedTasks / totalTasks) * 100; // Calculate progress
+
+  // Update the progress bar
+  updateProgressBar(progress);
+
+  // Loop through each task to render it
   todos.forEach(function(todoObject) {
-      const { task_id, title, formatted_due_date, is_completed, description, priority, showDescription } = todoObject;
-      const formattedDueDateEdit = formatDateEdit(formatted_due_date);
+    const { task_id, title, formatted_due_date, is_completed, description, priority, showDescription } = todoObject;
+    const formattedDueDateEdit = formatDateEdit(formatted_due_date);
 
-      // Set up checked status for completed tasks and CSS class for completed appearance
-      const checked = is_completed ? 'checked' : '';
-      const completedClass = is_completed ? 'completed' : '';
-      const descriptionVisibility = showDescription ? '' : 'hidden';
-      const arrowDirection = showDescription ? '⬆️' : '⬇️';
+    const checked = is_completed ? 'checked' : '';
+    const completedClass = is_completed ? 'completed' : '';
+    const descriptionVisibility = showDescription ? '' : 'hidden';
+    const arrowDirection = showDescription ? '⬆️' : '⬇️';
 
-
-      // Define the HTML for each task item, including edit and delete options
-      const taskHTML = `
-      <div class="todo_box ${completedClass}" value="${task_id}" style=" display:${currentFilter === 'incomplete' && is_completed ? 'none!important': 'grid'} ;border-left: 5px solid ${getPriorityColor(priority)};">
-          <div class="todo-header">
-              <input type="checkbox" onchange="toggleCompleteTask(${task_id})" class="complete-todo" data-id="${task_id}" ${checked}>
-              <div class="todo todo-small-name">${title}</div>
-              <div class="todo todo-date">${formatted_due_date}</div>
-              <button class="edit-todo" onclick="toggleEditSection(${task_id})">Edit</button>
-              <button class="delete-todo" onclick="deleteTask(${task_id})">Delete</button>
-              <button class="toggle-description" onclick="toggleDescription(${task_id})">${arrowDirection}</button>
-          </div>
-          <div class="task-description ${descriptionVisibility}">
-              ${description || 'No description provided.'}
-          </div>
-          <!-- Hidden edit section for updating task details -->
-          <div id="edit-section-${task_id}" class="edit-section hidden">
-              <input type="text" id="editName-${task_id}" value="${title}" placeholder="Task Name" class="todo-name">
-              <input type="date" id="editDueDate-${task_id}" value="${formattedDueDateEdit}" class="todo-due-date" placeholder="${formattedDueDateEdit}">
-              <input type="text" id="editDescription-${task_id}" value="${description}"  placeholder="Enter Description" class="todo-description">
-              <select id="editPriority-${task_id}" class="todo-priority">
-                  <option value="Low" ${priority === 'Low' ? 'selected' : ''}>Low</option>
-                  <option value="Medium" ${priority === 'Medium' ? 'selected' : ''}>Medium</option>
-                  <option value="High" ${priority === 'High' ? 'selected' : ''}>High</option>
-              </select>
-              <button onclick="saveEdit(${task_id})" class="save-todo">Save</button>
-          </div>
-      </div>
-      `;
-
-      // Append the generated HTML for each task to the todos container in the DOM
-      todosList.innerHTML += taskHTML;
+    // Define the HTML for each task item
+    const taskHTML = `
+    <div class="todo_box ${completedClass}" value="${task_id}" style=" display:${currentFilter === 'incomplete' && is_completed ? 'none!important': 'grid'} ;border-left: 5px solid ${getPriorityColor(priority)};">
+        <div class="todo-header">
+            <input type="checkbox" onchange="toggleCompleteTask(${task_id})" class="complete-todo" data-id="${task_id}" ${checked}>
+            <div class="todo todo-small-name">${title}</div>
+            <div class="todo todo-date">${formatted_due_date}</div> <!-- Rendering the due_date -->
+            <button class="edit-todo" onclick="toggleEditSection(${task_id})">Edit</button>
+            <button class="delete-todo" onclick="deleteTask(${task_id})">Delete</button>
+            <button class="toggle-description" onclick="toggleDescription(${task_id})">${arrowDirection}</button>
+        </div>
+        <div class="task-description ${descriptionVisibility}">
+            ${description || 'No description provided.'}
+        </div>
+    </div>
+    `;
+    todosList.innerHTML += taskHTML;
   });
 }
 
@@ -211,32 +204,45 @@ function toggleEditSection(taskId) {
   editSection.classList.toggle('hidden');
 }
 
-
 async function saveEdit(taskId) {
+  // Get the updated values from the edit input fields
   const updatedTask = {
-      title: document.getElementById(`editName-${taskId}`).value,
-      description: document.getElementById(`editDescription-${taskId}`).value,
-      due_date: document.getElementById(`editDueDate-${taskId}`).value,
-      priority: document.getElementById(`editPriority-${taskId}`).value
+    title: document.getElementById(`editName-${taskId}`).value,
+    description: document.getElementById(`editDescription-${taskId}`).value,
+    due_date: document.getElementById(`editDueDate-${taskId}`).value,
+    priority: document.getElementById(`editPriority-${taskId}`).value
   };
 
-
+  // Ensure that the updated task has a title and due date
   if (!updatedTask.title || !updatedTask.due_date) {
-      alert('Please enter a task and due date!');
-      return;
+    alert('Please enter a task name and due date!');
+    return;
   }
 
-  // Call the updateTask function to send the changes to the backend
-  await updateTask(taskId, updatedTask);
-  
-  // Refresh tasks after saving
-  await fetchTodos();
+  // Retrieve the tasks from localStorage
+  let todos = JSON.parse(localStorage.getItem('saved-todos')) || [];
 
-  // Re-render the tasks
-  renderTodos();
+  // Find the index of the task to be updated based on taskId
+  const taskIndex = todos.findIndex(todo => todo.task_id === taskId);
 
-  updateCalendarEvents();
+  if (taskIndex !== -1) {
+    // Update the task at the found index
+    todos[taskIndex] = {
+      ...todos[taskIndex], // Keep other properties unchanged
+      ...updatedTask // Apply the updated values
+    };
+
+    // Save the updated tasks back to localStorage
+    localStorage.setItem('saved-todos', JSON.stringify(todos));
+
+    // Re-render the tasks and update the calendar
+    renderTodos();
+    updateCalendarEvents(); // Ensure the calendar reflects the updated tasks
+  } else {
+    console.error('Task not found!');
+  }
 }
+
 
 
 async function updateTask(taskId, updatedData) {
@@ -255,48 +261,6 @@ async function updateTask(taskId, updatedData) {
 }
 
 
-
-// async function editTask(id) {
-//   let todos = JSON.parse(localStorage.getItem('saved-todos'));
-//   const task = todos.find(todo => todo.task_id === id);
-
-//   if (!task) return alert("Task not found!");
-
-//   // Open modal with task details pre-filled
-//   document.querySelector('#editTodoModal').style.display = 'block';
-//   document.querySelector('#editName').value = task.title;
-//   document.querySelector('#editDescription').value = task.description;
-//   document.querySelector('#editDueDate').value = task.due_date;
-//   document.querySelector('#editPriority').value = task.priority;
-
-//   document.querySelector('#saveEdit').onclick = async () => {
-//     const updatedTask = {
-//       title: document.querySelector('#editName').value,
-//       description: document.querySelector('#editDescription').value,
-//       due_date: document.querySelector('#editDueDate').value,
-//       priority: document.querySelector('#editPriority').value
-//     };
-
-//     // Update task via backend API
-//     await fetch(`http://localhost:8000/tasks/${id}`, {
-//       method: 'PUT',
-//       headers: {
-//         'Content-Type': 'application/json',
-//         'Authorization': `Bearer ${localStorage.getItem('token')}`
-//       },
-//       body: JSON.stringify(updatedTask)
-//     });
-
-//     // Close modal and refresh
-//     document.querySelector('#editTodoModal').style.display = 'none';
-//     await fetchTodos();
-//     renderTodos();
-//   };
-// }
-
-// document.querySelector('#closeEditModal').onclick = () => {
-//   document.querySelector('#editTodoModal').style.display = 'none';
-// };
 
 
 
@@ -329,75 +293,148 @@ async function toggleDescription(id) {
   renderTodos();
 }
 async function deleteTask(id) {
-  res= await fetch(`${API_ENDPOINT}/tasks/${id}`, {
-    method: 'DELETE',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('token')}`
-    }
-  });
-  await fetchTodos();
-  // Re-render the tasks
-  renderTodos();
+  // Retrieve tasks from localStorage
+  let todos = JSON.parse(localStorage.getItem('saved-todos')) || [];
 
-  // Re-render the calendar to reflect the changes
+  // Filter out the task to be deleted based on the task_id
+  todos = todos.filter(todo => todo.task_id !== id);
+
+  // Update localStorage with the new list after deletion
+  localStorage.setItem('saved-todos', JSON.stringify(todos));
+
+  // Re-render the tasks and update the calendar
+  renderTodos();
   updateCalendarEvents();
 }
 
-async function addTodo() {
-  const todo = todoName.value;
-  const todoDuedate = todoDuedateElement.value;
-  const todoDescription = todoDescriptionElement.value;
-  const todoPriority = todoPriorityElement.value; 
+
+
+function renderTodos() {
+  let todos = JSON.parse(localStorage.getItem('saved-todos')) || [];
+  const currentFilter = localStorage.getItem('currentFilter') || 'all';
+
+  // Clear the current list of tasks in the DOM
+  todosList.innerHTML = '';
+
+  // Variables to track the progress
+  let totalTasks = todos.length;
+  let completedTasks = todos.filter(todo => todo.is_completed).length;
+  let progress = totalTasks === 0 ? 0 : (completedTasks / totalTasks) * 100; // Calculate progress
+
+  // Update the progress bar
+  updateProgressBar(progress);
+
+  // Loop through each task to render it
+  todos.forEach(function (todoObject) {
+    const {
+      task_id,
+      title,
+      due_date, // Use the raw due_date here
+      is_completed,
+      description,
+      priority,
+      showDescription,
+    } = todoObject;
+
+    const checked = is_completed ? 'checked' : '';
+    const completedClass = is_completed ? 'completed' : '';
+    const descriptionVisibility = showDescription ? '' : 'hidden';
+    const arrowDirection = showDescription ? '⬆️' : '⬇️';
+
+    // Define the HTML for each task item
+    const taskHTML = `
+      <div class="todo_box ${completedClass}" value="${task_id}" style=" display:${
+      currentFilter === 'incomplete' && is_completed ? 'none!important' : 'grid'
+    }; border-left: 5px solid ${getPriorityColor(priority)};">
+          <div class="todo-header">
+              <input type="checkbox" onchange="toggleCompleteTask(${task_id})" class="complete-todo" data-id="${task_id}" ${checked}>
+              <div class="todo todo-small-name">${title}</div>
+              <div class="todo todo-date">${due_date}</div> <!-- Display due_date -->
+              <button class="edit-todo" onclick="toggleEditSection(${task_id})">Edit</button>
+              <button class="delete-todo" onclick="deleteTask(${task_id})">Delete</button>
+              <button class="toggle-description" onclick="toggleDescription(${task_id})">${arrowDirection}</button>
+          </div>
+          <div class="task-description ${descriptionVisibility}">
+              ${description || 'No description provided.'}
+          </div>
+      </div>
+    `;
+    todosList.innerHTML += taskHTML;
+  });
+}
+
+
+
+// Update the progress bar on the page
+function updateProgressBar(progress) {
+  const progressBar = document.getElementById('progress-bar');
+  const progressPercentage = document.getElementById('progress-percentage');
   
+  progressBar.style.width = progress + '%'; // Set the progress bar width
+  progressPercentage.innerText = Math.round(progress) + '%'; // Display the progress percentage
+}
+
+// Function to toggle task completion
+async function toggleCompleteTask(id) {
+  let todos = JSON.parse(localStorage.getItem('saved-todos')) || [];
+  const task = todos.find(todo => todo.task_id === id);
+
+  if (task) {
+    task.is_completed = !task.is_completed; // Toggle completion status
+    localStorage.setItem('saved-todos', JSON.stringify(todos)); // Update localStorage
+  }
+  
+  renderTodos(); // Re-render tasks and update progress
+}
+
+async function addTodo() {
+  const todo = todoName.value.trim(); // Ensure no empty spaces
+  const todoDuedate = todoDuedateElement.value; // Use the date picker value directly
+  const todoDescription = todoDescriptionElement.value.trim();
+  const todoPriority = todoPriorityElement.value;
+
+  // Check for empty fields
   if (!todo || !todoDuedate) {
     alert('Please enter a task and due date!');
     return;
   }
 
-  request = {
+  const newTask = {
+    task_id: Date.now(), // Unique ID for the task
     title: todo,
     description: todoDescription,
-    due_date: todoDuedate,
-    priority: todoPriority
+    due_date: todoDuedate, // Save as YYYY-MM-DD
+    priority: todoPriority,
+    is_completed: false,
+    showDescription: false,
+    formatted_due_date: formatDate(todoDuedate), // Ensure it gets formatted for display
   };
 
-  res= await fetch(`${API_ENDPOINT}/tasks`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${localStorage.getItem('token')}`
-    },
-    body: JSON.stringify(request)
-  });
+  // Get existing tasks from localStorage
+  let todos = JSON.parse(localStorage.getItem('saved-todos')) || [];
 
-  if (res.status !== 201) {
-    alert('Failed to add task');
-    return;
-  }
+  // Add the new task to the existing task list
+  todos.push(newTask);
 
+  // Save the updated tasks back to localStorage
+  localStorage.setItem('saved-todos', JSON.stringify(todos));
 
-
-  // todos.push({
-  //   name: todo,
-  //   dueDate: todoDuedate,
-  //   description: todoDescription,
-  //   priority: todoPriority, 
-  //   completed: false,
-  //   showDescription: false
-  // });
-
+  // Clear input fields
   todoName.value = '';
   todoDuedateElement.value = '';
   todoDescriptionElement.value = '';
-  todoPriorityElement.value = 'low'; // Reset priority to default
-  await fetchTodos();
-  renderTodos();
-  // localStorage.setItem('saved-todos', JSON.stringify(todos));
+  todoPriorityElement.value = 'Low'; // Reset priority to default
 
-  // Update the calendar after adding a new todo
+  // Re-render tasks and update the calendar
+  renderTodos();
   updateCalendarEvents();
+
 }
+
+
+
+
+
 
 // Helper function to get the color based on priority
 function getPriorityColor(priority) {
@@ -414,20 +451,25 @@ function getPriorityColor(priority) {
 }
 
 function updateCalendarEvents() {
-  // Clear all events first
+  // Clear all events from the calendar
   calendar.getEvents().forEach(event => event.remove());
-  todos = JSON.parse(localStorage.getItem('saved-todos')) || [];
-  // Add updated todos as events
-  todos.forEach(function(todo) {
+
+  // Retrieve tasks from localStorage
+  const todos = JSON.parse(localStorage.getItem('saved-todos')) || [];
+
+  // Add updated todos as events to the calendar
+  todos.forEach(function (todo) {
     calendar.addEvent({
-      title: todo.title,
-      start: todo.formatted_due_date,
-      backgroundColor: getPriorityColor(todo.priority), // Apply color based on priority
-      borderColor: todo.completed ? '#d3d3d3' : '', // Grey out completed tasks
-      classNames: todo.completed ? 'completed-event' : '' // Add class if task is completed
+      title: todo.title, // Task title
+      start: todo.due_date, // Use the raw due_date directly
+      backgroundColor: getPriorityColor(todo.priority), // Color based on priority
+      borderColor: todo.is_completed ? '#d3d3d3' : '', // Grey out completed tasks
+      classNames: todo.is_completed ? 'completed-event' : '' // Add class if task is completed
     });
   });
 }
+
+
 
 // Logout functionality
 document.getElementById('logoutBtn').addEventListener('click', () => {
@@ -456,6 +498,11 @@ function formatDateEdit(dateString) {
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 }
+
+
+
+
+
 // Function to fetch todos
 async function fetchTodos() {
   res = await fetch(`${API_ENDPOINT}/tasks`, {
