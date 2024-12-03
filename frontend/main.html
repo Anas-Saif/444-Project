@@ -15,9 +15,22 @@
         
         <button id="logoutBtn" class="btn">Logout</button>
     </div>
+
+
+
     <h2>Student Pilot</h2>
 
-    
+   
+
+    <!-- Progress Bar Section -->
+  <div class="progress-container">
+    <h4>Task Completion Progress</h4>
+   <div class="progress-bar">
+    <div class="progress" id="progress-bar"></div>
+  </div>
+  <p id="progress-percentage">0%</p>
+</div>
+
   <div class="container">
     <h3>Goals</h3>
 
@@ -26,10 +39,12 @@
       <input class="todo-due-date" type="date">
       <input class="todo-description" placeholder="Add a description"> 
       <select class="todo-priority">
+        
         <option value="Low">Low Priority</option>
         <option value="Medium">Medium Priority</option>
         <option value="High">High Priority</option>
       </select>
+      
       <button class="add-todo">Add</button>
     </div>
 
